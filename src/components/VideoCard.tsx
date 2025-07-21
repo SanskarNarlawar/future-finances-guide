@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Clock, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Play, Clock, CheckCircle, X } from "lucide-react";
 import { Quiz } from "./Quiz";
 
 export interface Video {
@@ -12,6 +13,7 @@ export interface Video {
   duration: number;
   thumbnail: string;
   category: string;
+  youtubeId: string;
   quiz: {
     questions: {
       id: string;
@@ -53,8 +55,14 @@ export const VideoCard = ({
   const [isWatched, setIsWatched] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
 
   const handleWatchVideo = () => {
+    setShowVideoPlayer(true);
+  };
+
+  const handleVideoClose = () => {
+    setShowVideoPlayer(false);
     setIsWatched(true);
   };
 
@@ -80,7 +88,37 @@ export const VideoCard = ({
   }
 
   return (
-    <Card className="shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden group">
+    <>
+      <Dialog open={showVideoPlayer} onOpenChange={setShowVideoPlayer}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{video.title}</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleVideoClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="aspect-video w-full">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`}
+              title={video.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="rounded-lg"
+            ></iframe>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Card className="shadow-card hover:shadow-elevated transition-all duration-300 overflow-hidden group">
       <div className="relative">
         <img 
           src={video.thumbnail} 
@@ -142,7 +180,8 @@ export const VideoCard = ({
             </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 };

@@ -25,7 +25,8 @@ const Learning = () => {
       date: "2024-01-15",
       readTime: 8,
       category: "Market Analysis",
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&h=300&fit=crop",
+      content: "Market volatility is one of the most challenging aspects of investing that every investor must understand and learn to navigate. Volatility refers to the degree of variation in trading prices over time, and it's a natural characteristic of financial markets.\n\nWhen markets are volatile, prices can swing dramatically in short periods. This can be unsettling for new investors, but understanding the causes and patterns of volatility can help you make more informed decisions about your investments.\n\nSeveral factors contribute to market volatility. Economic indicators such as inflation rates, employment data, and GDP growth can cause markets to react strongly. Political events, natural disasters, and global conflicts also create uncertainty that manifests as increased volatility.\n\nTo navigate volatile markets successfully, consider these strategies: maintain a diversified portfolio across different asset classes and sectors, avoid making emotional decisions based on short-term market movements, and stick to your long-term investment plan. Remember that volatility works in both directions – while it can create losses, it also presents opportunities for gains.\n\nDollar-cost averaging is another effective strategy during volatile periods. By investing a fixed amount regularly, you buy more shares when prices are low and fewer when prices are high, potentially reducing your average cost over time.\n\nFinally, remember that volatility is temporary, but time in the market is more important than timing the market. Successful long-term investors learn to view volatility as a normal part of the investment journey rather than something to fear."
     },
     {
       id: "2", 
@@ -35,7 +36,8 @@ const Learning = () => {
       date: "2024-01-12",
       readTime: 12,
       category: "Investment Strategy", 
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
+      content: "Albert Einstein allegedly called compound interest 'the eighth wonder of the world,' and for good reason. Compound interest is the process by which your investments generate earnings, and those earnings then generate their own earnings, creating a snowball effect that can dramatically increase your wealth over time.\n\nThe mathematics of compound interest might seem simple, but its long-term effects are profound. When you invest money, you earn returns not just on your initial investment (the principal), but also on all the returns that investment has generated over time. This means your money grows at an accelerating rate rather than a linear one.\n\nTo illustrate this power, consider investing $10,000 at an annual return of 7%. After one year, you'd have $10,700. But after 30 years, assuming you never added another penny, you'd have over $76,000. The initial $10,000 would have generated more than $66,000 in compound returns.\n\nThe key factors that maximize compound interest are time, rate of return, and frequency of compounding. Starting early is crucial because compound interest works best over long periods. Even small amounts invested in your twenties can grow to substantial sums by retirement.\n\nThe rate of return also matters significantly. A difference of just 2-3% in annual returns can result in hundreds of thousands of dollars difference over a 30-40 year investment horizon. This is why it's important to minimize fees and taxes that can erode your returns.\n\nTo harness compound interest effectively, start investing as early as possible, be consistent with your contributions, reinvest your dividends and interest payments, and be patient. Avoid the temptation to withdraw funds early, as this breaks the compounding cycle and significantly reduces long-term growth potential."
     },
     {
       id: "3",
@@ -45,7 +47,8 @@ const Learning = () => {
       date: "2024-01-10",
       readTime: 10,
       category: "Portfolio Management",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop",
+      content: "Diversification is often called the only free lunch in investing, and understanding this concept is crucial for building a successful long-term investment strategy. At its core, diversification means spreading your investments across various assets to reduce overall portfolio risk without necessarily sacrificing returns.\n\nThe principle behind diversification is that different investments often perform differently under various market conditions. When some investments in your portfolio are declining in value, others may be stable or even increasing, helping to smooth out overall portfolio performance and reduce volatility.\n\nThere are several types of diversification to consider. Asset class diversification involves spreading investments across stocks, bonds, real estate, commodities, and cash. Geographic diversification means investing in both domestic and international markets. Sector diversification involves investing across different industries like technology, healthcare, finance, and consumer goods.\n\nWithin the stock portion of your portfolio, you should also diversify by company size (large-cap, mid-cap, small-cap stocks) and investment style (growth vs. value stocks). This helps ensure you're not overly dependent on any single market segment's performance.\n\nBond diversification is equally important. Consider mixing government bonds, corporate bonds, and international bonds with different maturities and credit qualities. This helps protect against interest rate risk and credit risk.\n\nHowever, be aware that diversification has limitations. During major market downturns, correlations between different assets often increase, meaning many investments may decline together. Also, over-diversification can lead to mediocre returns if you spread your investments too thin.\n\nA well-diversified portfolio typically includes 60-80% stocks and 20-40% bonds for younger investors, with the bond allocation increasing as you approach retirement. Regular rebalancing helps maintain your target allocation and can actually boost returns over time by forcing you to sell high-performing assets and buy underperforming ones."
     }
   ];
 
@@ -92,6 +95,7 @@ const Learning = () => {
       description: "A comprehensive introduction to stock market investing covering key concepts, terminology, and getting started.",
       duration: 15,
       category: "Beginner",
+      youtubeId: "p7HKvqRI_Bo",
       thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&h=300&fit=crop",
       quiz: {
         questions: [
@@ -137,6 +141,7 @@ const Learning = () => {
       description: "Learn about bonds, how they work, and their role in a diversified investment portfolio.",
       duration: 12,
       category: "Intermediate",
+      youtubeId: "IuyejHOGCro",
       thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
       quiz: {
         questions: [
@@ -171,6 +176,7 @@ const Learning = () => {
       description: "Explore sophisticated techniques for optimizing your investment portfolio including Modern Portfolio Theory.",
       duration: 20,
       category: "Advanced",
+      youtubeId: "5VEWCtPmRXg",
       thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop",
       quiz: {
         questions: [
