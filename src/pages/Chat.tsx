@@ -149,6 +149,9 @@ const Chat = () => {
             <Link to="/dashboard">
               <Button variant="outline">Dashboard</Button>
             </Link>
+            <Link to="/learning">
+              <Button variant="outline">Learning</Button>
+            </Link>
           </div>
         </div>
       </nav>

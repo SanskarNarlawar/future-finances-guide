@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Coins, Building, PiggyBank, Plus, MessageSquare } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Coins, Building, PiggyBank, Plus, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface Asset {
@@ -93,6 +93,12 @@ const Dashboard = () => {
             <span className="text-2xl font-bold text-foreground">FinanceAI</span>
           </Link>
           <div className="flex space-x-4">
+            <Link to="/learning">
+              <Button variant="outline">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Learning
+              </Button>
+            </Link>
             <Link to="/chat">
               <Button variant="outline">
                 <MessageSquare className="mr-2 h-4 w-4" />
@@ -120,7 +126,7 @@ const Dashboard = () => {
               <DollarSign className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">€{totalValue.toLocaleString()}</div>
               <p className="text-xs text-success flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +12.5% from last month
@@ -198,7 +204,7 @@ const Dashboard = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[assets[index]?.type] || '#8884d8'} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']} />
+                      <Tooltip formatter={(value: number) => [`€${value.toLocaleString()}`, 'Value']} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="mt-4 space-y-2">
@@ -230,7 +236,7 @@ const Dashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Portfolio Value']} />
+                      <Tooltip formatter={(value: number) => [`€${value.toLocaleString()}`, 'Portfolio Value']} />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
@@ -264,7 +270,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="assetValue">Current Value ($)</Label>
+                    <Label htmlFor="assetValue">Current Value (€)</Label>
                     <Input
                       id="assetValue"
                       type="number"
@@ -308,7 +314,7 @@ const Dashboard = () => {
                           <p className="text-sm text-muted-foreground capitalize">{asset.type}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold">${asset.value.toLocaleString()}</p>
+                          <p className="font-bold">€{asset.value.toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">
                             {((asset.value / totalValue) * 100).toFixed(1)}%
                           </p>
@@ -335,7 +341,7 @@ const Dashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="type" />
                       <YAxis />
-                      <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']} />
+                      <Tooltip formatter={(value: number) => [`€${value.toLocaleString()}`, 'Value']} />
                       <Bar dataKey="value" fill="#3B82F6" />
                     </BarChart>
                   </ResponsiveContainer>
