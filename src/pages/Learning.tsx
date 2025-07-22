@@ -297,7 +297,7 @@ const Learning = () => {
       description: "A comprehensive introduction to stock market investing covering key concepts, terminology, and getting started strategies.",
       duration: 18,
       category: "Beginner",
-      youtubeId: "hE2NsJE3dGk",
+      youtubeId: "p7HKvqRI_Bo",
       thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&h=300&fit=crop",
       quiz: {
         questions: [
@@ -343,7 +343,7 @@ const Learning = () => {
       description: "Learn about bonds, how they work, their risks and rewards, and their role in a diversified investment portfolio.",
       duration: 14,
       category: "Intermediate",
-      youtubeId: "pW6RYOGzHNI",
+      youtubeId: "IuyejHOGCro",
       thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop",
       quiz: {
         questions: [
@@ -385,7 +385,7 @@ const Learning = () => {
     },
     {
       id: "3",
-      title: "Portfolio Diversification Strategies",
+      title: "Portfolio Diversification Strategies", 
       description: "Explore advanced techniques for building a well-diversified portfolio to minimize risk and maximize returns.",
       duration: 22,
       category: "Advanced",
@@ -470,7 +470,7 @@ const Learning = () => {
       description: "Understanding digital currencies, blockchain technology, and how to evaluate cryptocurrency investments.",
       duration: 19,
       category: "Alternative Investments",
-      youtubeId: "rYQgy8QDEBI",
+      youtubeId: "VYWc9dFqROI",
       thumbnail: "https://images.unsplash.com/photo-1518544866310-3ad75419f2ba?w=500&h=300&fit=crop",
       quiz: {
         questions: [
@@ -505,7 +505,7 @@ const Learning = () => {
       description: "Learn about Environmental, Social, and Governance investing and how to align your investments with your values.",
       duration: 16,
       category: "ESG",
-      youtubeId: "tH6EFQn0brs",
+      youtubeId: "F0J6zTyjvY4",
       thumbnail: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=500&h=300&fit=crop",
       quiz: {
         questions: [

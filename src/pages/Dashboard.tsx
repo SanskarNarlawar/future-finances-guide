@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Coins, Building, PiggyBank, Plus, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useTranslations } from "@/hooks/useTranslations";
 
 interface Asset {
   name: string;
@@ -15,6 +17,7 @@ interface Asset {
 }
 
 const Dashboard = () => {
+  const { currentLanguage, setCurrentLanguage, t } = useTranslations();
   const [assets, setAssets] = useState<Asset[]>([
     { name: "Apple Stock", value: 15000, type: "stocks" },
     { name: "Gold Investment", value: 8000, type: "gold" },
@@ -92,11 +95,15 @@ const Dashboard = () => {
             <TrendingUp className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">FinanceAI</span>
           </Link>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
+            <LanguageSwitcher 
+              currentLanguage={currentLanguage}
+              onLanguageChange={setCurrentLanguage}
+            />
             <Link to="/learning">
               <Button variant="outline">
                 <BookOpen className="mr-2 h-4 w-4" />
-                Learning
+                {t('learning')}
               </Button>
             </Link>
             <Link to="/chat">
@@ -112,9 +119,9 @@ const Dashboard = () => {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Financial Dashboard</h1>
+          <h1 className="text-4xl font-bold mb-2">{t('financialDashboard')}</h1>
           <p className="text-muted-foreground text-lg">
-            Track your investments and get AI-powered insights
+            {t('dashboardDescription')}
           </p>
         </div>
 
@@ -122,7 +129,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Portfolio</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('totalPortfolio')}</CardTitle>
               <DollarSign className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -136,7 +143,7 @@ const Dashboard = () => {
 
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assets Count</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('assetsCount')}</CardTitle>
               <Building className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -149,7 +156,7 @@ const Dashboard = () => {
 
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Portfolio Health</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('portfolioHealth')}</CardTitle>
               <PiggyBank className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -162,7 +169,7 @@ const Dashboard = () => {
 
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Growth</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('monthlyGrowth')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -176,9 +183,9 @@ const Dashboard = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="assets">Manage Assets</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="overview">{t('overview')}</TabsTrigger>
+            <TabsTrigger value="assets">{t('manageAssets')}</TabsTrigger>
+            <TabsTrigger value="analytics">{t('analytics')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
