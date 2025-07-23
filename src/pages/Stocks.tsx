@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,32 +79,65 @@ const Stocks = () => {
     }
   }, []);
 
-  // Fetch stock data when API key is configured or selected stock changes
-  useEffect(() => {
-    if (apiConfig.isConfigured && selectedStock) {
-      fetchStockData(selectedStock);
-      fetchChartData(selectedStock, timeframe);
-      fetchNewsData(selectedStock);
-    }
-  }, [apiConfig.isConfigured, selectedStock]);
-
-  // Fetch chart data when timeframe changes
-  useEffect(() => {
-    if (apiConfig.isConfigured && selectedStock) {
-      fetchChartData(selectedStock, timeframe);
-    }
-  }, [timeframe]);
-
-  const handleApiKeySubmit = (key: string) => {
+  const handleApiKeySubmit = useCallback((key: string) => {
     if (key.trim()) {
       localStorage.setItem('alphaVantageApiKey', key.trim());
       setApiConfig({ apiKey: key.trim(), isConfigured: true });
       setShowApiKeyInput(false);
       setError(null);
     }
-  };
+  }, []);
 
-  const fetchStockData = async (symbol: string) => {
+  const generateMockChartData = useCallback((symbol: string, timeframe: string) => {
+    const currentStock = stocksData[symbol];
+    const basePrice = currentStock?.price || 150;
+    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
+    
+    const data: ChartData[] = [];
+    for (let i = days; i >= 0; i--) {
+      const date = new Date();
+      if (timeframe === "1D") {
+        date.setMinutes(date.getMinutes() - (i * 5));
+      } else if (timeframe === "1W") {
+        date.setDate(date.getDate() - i);
+      } else {
+        date.setDate(date.getDate() - i);
+      }
+      
+      const variation = (Math.random() - 0.5) * 5;
+      const price = basePrice + variation - (i * 0.01);
+      
+      data.push({
+        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
+        price: Math.max(price, basePrice * 0.9),
+        volume: Math.floor(Math.random() * 10000000) + 1000000
+      });
+    }
+    setChartData(data);
+  }, [stocksData]);
+
+  const getMockNewsData = useCallback((symbol: string): NewsItem[] => [
+    {
+      id: "1",
+      title: `${symbol} Reports Strong Quarterly Earnings`,
+      summary: `${symbol} reported better-than-expected quarterly results with strong revenue growth.`,
+      source: "Financial News",
+      publishedAt: new Date().toISOString(),
+      url: "#",
+      sentiment: "positive"
+    },
+    {
+      id: "2",
+      title: "Market Volatility Affects Tech Stocks",
+      summary: "Recent market movements have impacted technology sector performance.",
+      source: "Market Watch",
+      publishedAt: new Date().toISOString(),
+      url: "#",
+      sentiment: "neutral"
+    }
+  ], []);
+
+  const fetchStockData = useCallback(async (symbol: string) => {
     if (!apiConfig.apiKey) return;
     
     setLoading(true);
@@ -166,9 +199,9 @@ const Stocks = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiConfig.apiKey]);
 
-  const fetchChartData = async (symbol: string, timeframe: string) => {
+  const fetchChartData = useCallback(async (symbol: string, timeframe: string) => {
     if (!apiConfig.apiKey) return;
     
     setChartLoading(true);
@@ -241,9 +274,9 @@ const Stocks = () => {
     } finally {
       setChartLoading(false);
     }
-  };
+  }, [apiConfig.apiKey, generateMockChartData]);
 
-  const fetchNewsData = async (symbol: string) => {
+  const fetchNewsData = useCallback(async (symbol: string) => {
     if (!apiConfig.apiKey) return;
     
     setNewsLoading(true);
@@ -277,56 +310,23 @@ const Stocks = () => {
     } finally {
       setNewsLoading(false);
     }
-  };
+  }, [apiConfig.apiKey, getMockNewsData]);
 
-  const generateMockChartData = (symbol: string, timeframe: string) => {
-    const currentStock = stocksData[symbol];
-    const basePrice = currentStock?.price || 150;
-    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
-    
-    const data: ChartData[] = [];
-    for (let i = days; i >= 0; i--) {
-      const date = new Date();
-      if (timeframe === "1D") {
-        date.setMinutes(date.getMinutes() - (i * 5));
-      } else if (timeframe === "1W") {
-        date.setDate(date.getDate() - i);
-      } else {
-        date.setDate(date.getDate() - i);
-      }
-      
-      const variation = (Math.random() - 0.5) * 5;
-      const price = basePrice + variation - (i * 0.01);
-      
-      data.push({
-        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
-        price: Math.max(price, basePrice * 0.9),
-        volume: Math.floor(Math.random() * 10000000) + 1000000
-      });
+  // Fetch stock data when API key is configured or selected stock changes
+  useEffect(() => {
+    if (apiConfig.isConfigured && selectedStock) {
+      fetchStockData(selectedStock);
+      fetchChartData(selectedStock, timeframe);
+      fetchNewsData(selectedStock);
     }
-    setChartData(data);
-  };
+  }, [apiConfig.isConfigured, selectedStock, fetchStockData, fetchChartData, fetchNewsData, timeframe]);
 
-  const getMockNewsData = (symbol: string): NewsItem[] => [
-    {
-      id: "1",
-      title: `${symbol} Reports Strong Quarterly Earnings`,
-      summary: `${symbol} reported better-than-expected quarterly results with strong revenue growth.`,
-      source: "Financial News",
-      publishedAt: new Date().toISOString(),
-      url: "#",
-      sentiment: "positive"
-    },
-    {
-      id: "2",
-      title: "Market Volatility Affects Tech Stocks",
-      summary: "Recent market movements have impacted technology sector performance.",
-      source: "Market Watch",
-      publishedAt: new Date().toISOString(),
-      url: "#",
-      sentiment: "neutral"
+  // Fetch chart data when timeframe changes
+  useEffect(() => {
+    if (apiConfig.isConfigured && selectedStock && timeframe) {
+      fetchChartData(selectedStock, timeframe);
     }
-  ];
+  }, [apiConfig.isConfigured, selectedStock, timeframe, fetchChartData]);
 
   const currentStock = stocksData[selectedStock];
   const isPositive = currentStock?.change >= 0;
@@ -338,22 +338,22 @@ const Stocks = () => {
     return `$${num.toLocaleString()}`;
   };
 
-  const toggleWatchlist = (symbol: string) => {
+  const toggleWatchlist = useCallback((symbol: string) => {
     setWatchlist(prev => 
       prev.includes(symbol) 
         ? prev.filter(s => s !== symbol)
         : [...prev, symbol]
     );
-  };
+  }, []);
 
-  const addToWatchlist = () => {
+  const addToWatchlist = useCallback(() => {
     if (searchQuery.trim() && !watchlist.includes(searchQuery.toUpperCase())) {
       const symbol = searchQuery.toUpperCase();
       setWatchlist(prev => [...prev, symbol]);
       setSelectedStock(symbol);
       setSearchQuery("");
     }
-  };
+  }, [searchQuery, watchlist]);
 
   // API Key Input Component
   if (showApiKeyInput || !apiConfig.isConfigured) {
