@@ -1,0 +1,21 @@
+steps:
+  # Install dependencies
+  - name: 'node:20'
+    entrypoint: 'npm'
+    args: ['install']
+    
+  # Build the application
+  - name: 'node:20'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    
+  # Verify build output
+  - name: 'node:20'
+    entrypoint: 'bash'
+    args: ['-c', 'ls -la dist/ && echo "Build verification complete"']
+
+# Artifacts to save
+artifacts:
+  objects:
+    location: 'gs://$PROJECT_ID_appspot.com/builds/$BUILD_ID'
+    paths: ['dist/**/*']
