@@ -1,0 +1,41 @@
+runtime: nodejs20
+
+# Don't run any build process - use pre-built files
+env_variables:
+  NODE_ENV: production
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+
+# Use a simple server.js to serve static files
+handlers:
+- url: /assets/(.*)
+  static_files: dist/assets/\1
+  upload: dist/assets/.*
+  secure: always
+  expiration: "1h"
+
+- url: /(favicon\.ico|robots\.txt|placeholder\.svg)
+  static_files: dist/\1
+  upload: dist/(favicon\.ico|robots\.txt|placeholder\.svg)
+  secure: always
+  expiration: "1h"
+
+- url: /.*
+  static_files: dist/index.html
+  upload: dist/index.html
+  secure: always
+  expiration: "0"
+
+# Skip files we don't need in production
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^(.*/)?.*\.bak$
+- ^(.*/)?node_modules/.*$
+- ^(.*/)?src/.*$
+- ^(.*/)?public/.*$
