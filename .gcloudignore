@@ -1,0 +1,49 @@
+# This file specifies files that are intentionally untracked by Git.
+# See https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore
+
+.git/
+.gitignore
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Source files (only deploy built dist folder)
+src/
+public/
+
+# Development files
+*.md
+README.md
+deploy.md
+
+# Configuration files (keep only essential ones)
+.env*
+.eslintrc*
+eslint.config.js
+.prettierrc*
+tailwind.config.ts
+tsconfig*.json
+vite.config.ts
+postcss.config.js
+components.json
+
+# Lock files
+bun.lockb
+package-lock.json
+
+# Build artifacts (keep dist)
+# dist/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

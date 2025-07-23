@@ -49,7 +49,7 @@ gcloud app browse
 
 ## Configuration Files
 
-### app.yaml (already created)
+### app.yaml (Updated for SPA Support)
 ```yaml
 runtime: nodejs20
 
@@ -61,39 +61,38 @@ automatic_scaling:
   max_instances: 10
 
 handlers:
-- url: /static
-  static_dir: dist/assets
+# Serve static assets (CSS, JS, images, etc.) with proper caching
+- url: /assets/(.*)
+  static_files: dist/assets/\1
+  upload: dist/assets/.*
   secure: always
+  expiration: "1h"
 
+# Serve favicon and other root-level static files
+- url: /(favicon\.ico|robots\.txt|placeholder\.svg)
+  static_files: dist/\1
+  upload: dist/(favicon\.ico|robots\.txt|placeholder\.svg)
+  secure: always
+  expiration: "1h"
+
+# Serve index.html for all other routes (SPA fallback)
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
   secure: always
+  expiration: "0"
 ```
 
-### Additional package.json for deployment
-You may need to create a temporary package.json for deployment:
-
-```json
-{
-  "name": "finance-ai-app",
-  "version": "1.0.0",
-  "description": "AI-powered financial dashboard",
-  "scripts": {
-    "build": "npm install && npm run build:app",
-    "build:app": "vite build",
-    "start": "serve -s dist -l $PORT"
-  },
-  "dependencies": {
-    "serve": "^14.2.1"
-  }
-}
-```
+### .gcloudignore (Created)
+This file ensures only necessary files are deployed:
+- Excludes source files, node_modules, and development files
+- Only deploys the built `dist/` folder and essential config files
 
 ## Deployment Commands Summary
 
 ```bash
 # 1. Build the project
+npm install
 npm run build
 
 # 2. Deploy to App Engine
@@ -106,17 +105,31 @@ gcloud app services set-traffic default --splits=VERSION_ID=1
 gcloud app logs tail -s default
 ```
 
+## Key Fixes Applied
+
+1. **SPA Routing Support**: Updated handlers to properly serve React Router routes
+2. **Asset Optimization**: Proper caching headers for static assets
+3. **File Organization**: Optimized deployment with .gcloudignore
+4. **Production Build**: Ensured proper Vite build configuration
+
 ## Important Notes
 
-1. **Static Site**: This is a frontend-only app, so we're deploying it as a static site
-2. **Routing**: The app.yaml handles client-side routing by serving index.html for all routes
-3. **Environment Variables**: Add any required environment variables in the app.yaml file
-4. **Cost Management**: Set max_instances to control costs
-5. **Custom Domain**: Configure custom domains in the App Engine settings
+1. **Single Page Application**: Configured for React Router client-side routing
+2. **Asset Caching**: Static assets cached for 1 hour, index.html not cached
+3. **Security**: All routes served over HTTPS
+4. **Cost Management**: Auto-scaling from 0 to 10 instances
+5. **File Size**: Built bundle is optimized for production
 
 ## Troubleshooting
 
-- If build fails, ensure all dependencies are properly installed
-- Check that the dist/ folder exists and contains the built files
-- Verify your Google Cloud project has billing enabled
-- Check the logs with `gcloud app logs tail -s default`
+- **Blank Page**: Ensure `npm run build` completes successfully
+- **404 Errors**: Check that dist/ folder contains index.html and assets/
+- **Routing Issues**: Verify app.yaml handlers are correctly configured
+- **Build Failures**: Run `npm install` before `npm run build`
+- **Deployment Size**: .gcloudignore excludes unnecessary files
+
+## Performance Tips
+
+- Assets are cached for 1 hour to improve load times
+- Consider implementing code splitting for larger applications
+- Monitor bundle size and use dynamic imports for optimization

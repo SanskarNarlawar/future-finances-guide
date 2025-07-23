@@ -8,11 +8,23 @@ automatic_scaling:
   max_instances: 10
 
 handlers:
-- url: /static
-  static_dir: dist/assets
+# Serve static assets (CSS, JS, images, etc.) with proper caching
+- url: /assets/(.*)
+  static_files: dist/assets/\1
+  upload: dist/assets/.*
   secure: always
+  expiration: "1h"
 
+# Serve favicon and other root-level static files
+- url: /(favicon\.ico|robots\.txt|placeholder\.svg)
+  static_files: dist/\1
+  upload: dist/(favicon\.ico|robots\.txt|placeholder\.svg)
+  secure: always
+  expiration: "1h"
+
+# Serve index.html for all other routes (SPA fallback)
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
   secure: always
+  expiration: "0"
