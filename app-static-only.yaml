@@ -21,21 +21,3 @@ handlers:
   upload: dist/index.html
   secure: always
   expiration: "0"
-
-# Skip all source files and only include dist
-skip_files:
-- ^(.*/)?#.*#$
-- ^(.*/)?.*~$
-- ^(.*/)?.*\.py[co]$
-- ^(.*/)?.*/RCS/.*$
-- ^(.*/)?\..*$
-- ^(.*/)?.*\.bak$
-- ^(.*/)?node_modules/.*$
-- ^(.*/)?src/.*$
-- ^(.*/)?public/.*$
-- ^(.*/)?.*\.json$
-- ^(.*/)?.*\.js$
-- ^(.*/)?.*\.ts$
-- ^(.*/)?.*\.md$
-- ^(.*/)?vite\.config\.ts$
-- ^(.*/)?tailwind\.config\.ts$
