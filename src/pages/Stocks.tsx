@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Search, Calendar, ExternalLink, MessageSquare, BookOpen, Bell, Star } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Search, Calendar, ExternalLink, MessageSquare, BookOpen, Bell, Star, Settings, AlertCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslations } from "@/hooks/useTranslations";
 import { format } from "date-fns";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface StockData {
   symbol: string;
@@ -19,11 +20,15 @@ interface StockData {
   change: number;
   changePercent: number;
   volume: number;
-  marketCap: number;
-  high52Week: number;
-  low52Week: number;
-  pe: number;
+  marketCap?: number;
+  high52Week?: number;
+  low52Week?: number;
+  pe?: number;
   lastUpdated: string;
+  previousClose: number;
+  open: number;
+  high: number;
+  low: number;
 }
 
 interface ChartData {
@@ -40,6 +45,12 @@ interface NewsItem {
   publishedAt: string;
   url: string;
   sentiment: 'positive' | 'negative' | 'neutral';
+  relevanceScore?: number;
+}
+
+interface ApiKeyConfig {
+  apiKey: string;
+  isConfigured: boolean;
 }
 
 const Stocks = () => {
@@ -48,116 +59,270 @@ const Stocks = () => {
   const [timeframe, setTimeframe] = useState<string>("1D");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [watchlist, setWatchlist] = useState<string[]>(["AAPL", "GOOGL", "MSFT", "TSLA"]);
+  const [apiConfig, setApiConfig] = useState<ApiKeyConfig>({ apiKey: "", isConfigured: false });
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [stocksData, setStocksData] = useState<Record<string, StockData>>({});
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [newsLoading, setNewsLoading] = useState(false);
 
-  // Mock data - in a real app, this would come from APIs like Alpha Vantage, Finnhub, etc.
-  const stocksData: Record<string, StockData> = {
-    AAPL: {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      price: 192.53,
-      change: 2.47,
-      changePercent: 1.3,
-      volume: 45672893,
-      marketCap: 2980000000000,
-      high52Week: 199.62,
-      low52Week: 164.08,
-      pe: 29.4,
-      lastUpdated: new Date().toISOString()
-    },
-    GOOGL: {
-      symbol: "GOOGL",
-      name: "Alphabet Inc.",
-      price: 138.21,
-      change: -0.85,
-      changePercent: -0.61,
-      volume: 28493021,
-      marketCap: 1750000000000,
-      high52Week: 153.78,
-      low52Week: 102.21,
-      pe: 25.8,
-      lastUpdated: new Date().toISOString()
-    },
-    MSFT: {
-      symbol: "MSFT", 
-      name: "Microsoft Corporation",
-      price: 418.34,
-      change: 5.21,
-      changePercent: 1.26,
-      volume: 19847392,
-      marketCap: 3100000000000,
-      high52Week: 468.35,
-      low52Week: 362.90,
-      pe: 34.2,
-      lastUpdated: new Date().toISOString()
-    },
-    TSLA: {
-      symbol: "TSLA",
-      name: "Tesla, Inc.",
-      price: 248.98,
-      change: -3.42,
-      changePercent: -1.35,
-      volume: 67283901,
-      marketCap: 790000000000,
-      high52Week: 278.98,
-      low52Week: 152.37,
-      pe: 67.3,
-      lastUpdated: new Date().toISOString()
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('alphaVantageApiKey');
+    if (savedApiKey) {
+      setApiConfig({ apiKey: savedApiKey, isConfigured: true });
+    } else {
+      setShowApiKeyInput(true);
+    }
+  }, []);
+
+  // Fetch stock data when API key is configured or selected stock changes
+  useEffect(() => {
+    if (apiConfig.isConfigured && selectedStock) {
+      fetchStockData(selectedStock);
+      fetchChartData(selectedStock, timeframe);
+      fetchNewsData(selectedStock);
+    }
+  }, [apiConfig.isConfigured, selectedStock]);
+
+  // Fetch chart data when timeframe changes
+  useEffect(() => {
+    if (apiConfig.isConfigured && selectedStock) {
+      fetchChartData(selectedStock, timeframe);
+    }
+  }, [timeframe]);
+
+  const handleApiKeySubmit = (key: string) => {
+    if (key.trim()) {
+      localStorage.setItem('alphaVantageApiKey', key.trim());
+      setApiConfig({ apiKey: key.trim(), isConfigured: true });
+      setShowApiKeyInput(false);
+      setError(null);
     }
   };
 
-  // Mock chart data
-  const generateChartData = (symbol: string, days: number): ChartData[] => {
-    const data: ChartData[] = [];
-    const basePrice = stocksData[symbol]?.price || 100;
+  const fetchStockData = async (symbol: string) => {
+    if (!apiConfig.apiKey) return;
     
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch global quote
+      const quoteResponse = await fetch(
+        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiConfig.apiKey}`
+      );
+      const quoteData = await quoteResponse.json();
+
+      // Check for API errors
+      if (quoteData['Error Message']) {
+        throw new Error('Invalid stock symbol or API limit exceeded');
+      }
+      
+      if (quoteData['Note']) {
+        throw new Error('API rate limit exceeded. Please wait a moment and try again.');
+      }
+
+      const quote = quoteData['Global Quote'];
+      if (!quote) {
+        throw new Error('No data available for this symbol');
+      }
+
+      // Fetch company overview for additional data
+      const overviewResponse = await fetch(
+        `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiConfig.apiKey}`
+      );
+      const overviewData = await overviewResponse.json();
+
+      const price = parseFloat(quote['05. price']) || 0;
+      const previousClose = parseFloat(quote['08. previous close']) || 0;
+      const change = parseFloat(quote['09. change']) || 0;
+      const changePercent = parseFloat(quote['10. change percent']?.replace('%', '')) || 0;
+
+      const stockData: StockData = {
+        symbol: quote['01. symbol'] || symbol,
+        name: overviewData['Name'] || symbol,
+        price: price,
+        change: change,
+        changePercent: changePercent,
+        volume: parseInt(quote['06. volume']) || 0,
+        marketCap: overviewData['MarketCapitalization'] ? parseInt(overviewData['MarketCapitalization']) : undefined,
+        high52Week: overviewData['52WeekHigh'] ? parseFloat(overviewData['52WeekHigh']) : undefined,
+        low52Week: overviewData['52WeekLow'] ? parseFloat(overviewData['52WeekLow']) : undefined,
+        pe: overviewData['PERatio'] ? parseFloat(overviewData['PERatio']) : undefined,
+        lastUpdated: quote['07. latest trading day'] || new Date().toISOString(),
+        previousClose: previousClose,
+        open: parseFloat(quote['02. open']) || 0,
+        high: parseFloat(quote['03. high']) || 0,
+        low: parseFloat(quote['04. low']) || 0,
+      };
+
+      setStocksData(prev => ({ ...prev, [symbol]: stockData }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchChartData = async (symbol: string, timeframe: string) => {
+    if (!apiConfig.apiKey) return;
+    
+    setChartLoading(true);
+    
+    try {
+      let apiFunction = 'TIME_SERIES_DAILY';
+      let outputSize = 'compact'; // Last 100 data points
+      
+      if (timeframe === '1W' || timeframe === '1M') {
+        apiFunction = 'TIME_SERIES_DAILY';
+        outputSize = 'compact';
+      } else if (timeframe === '1Y') {
+        apiFunction = 'TIME_SERIES_WEEKLY';
+        outputSize = 'full';
+      } else if (timeframe === '1D') {
+        apiFunction = 'TIME_SERIES_INTRADAY';
+      }
+
+      let url = '';
+      if (apiFunction === 'TIME_SERIES_INTRADAY') {
+        url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&interval=5min&apikey=${apiConfig.apiKey}`;
+      } else {
+        url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&outputsize=${outputSize}&apikey=${apiConfig.apiKey}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data['Error Message'] || data['Note']) {
+        // Fallback to mock data if API limit exceeded
+        generateMockChartData(symbol, timeframe);
+        return;
+      }
+
+      let timeSeries: any = {};
+      if (apiFunction === 'TIME_SERIES_INTRADAY') {
+        timeSeries = data['Time Series (5min)'] || {};
+      } else if (apiFunction === 'TIME_SERIES_DAILY') {
+        timeSeries = data['Time Series (Daily)'] || {};
+      } else if (apiFunction === 'TIME_SERIES_WEEKLY') {
+        timeSeries = data['Weekly Time Series'] || {};
+      }
+
+      const chartPoints: ChartData[] = [];
+      const dates = Object.keys(timeSeries).sort();
+      
+      // Filter dates based on timeframe
+      let filteredDates = dates;
+      if (timeframe === '1W') {
+        filteredDates = dates.slice(-7);
+      } else if (timeframe === '1M') {
+        filteredDates = dates.slice(-30);
+      } else if (timeframe === '1D') {
+        filteredDates = dates.slice(-78); // Last 6.5 hours of 5min intervals
+      }
+
+      filteredDates.forEach(date => {
+        const dayData = timeSeries[date];
+        chartPoints.push({
+          date: timeframe === '1D' ? format(new Date(date), 'HH:mm') : format(new Date(date), 'MMM dd'),
+          price: parseFloat(dayData['4. close']),
+          volume: parseInt(dayData['5. volume']) || 0
+        });
+      });
+
+      setChartData(chartPoints);
+    } catch (err) {
+      // Fallback to mock data on error
+      generateMockChartData(symbol, timeframe);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  const fetchNewsData = async (symbol: string) => {
+    if (!apiConfig.apiKey) return;
+    
+    setNewsLoading(true);
+    
+    try {
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&apikey=${apiConfig.apiKey}`
+      );
+      const data = await response.json();
+
+      if (data['Error Message'] || data['Note']) {
+        // Use mock news data if API limit exceeded
+        setNewsData(getMockNewsData(symbol));
+        return;
+      }
+
+      const newsItems: NewsItem[] = (data.feed || []).slice(0, 5).map((item: any, index: number) => ({
+        id: index.toString(),
+        title: item.title,
+        summary: item.summary,
+        source: item.source,
+        publishedAt: item.time_published,
+        url: item.url,
+        sentiment: item.overall_sentiment_label?.toLowerCase() || 'neutral',
+        relevanceScore: item.relevance_score
+      }));
+
+      setNewsData(newsItems);
+    } catch (err) {
+      setNewsData(getMockNewsData(symbol));
+    } finally {
+      setNewsLoading(false);
+    }
+  };
+
+  const generateMockChartData = (symbol: string, timeframe: string) => {
+    const currentStock = stocksData[symbol];
+    const basePrice = currentStock?.price || 150;
+    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
+    
+    const data: ChartData[] = [];
     for (let i = days; i >= 0; i--) {
       const date = new Date();
-      date.setDate(date.getDate() - i);
-      const variation = (Math.random() - 0.5) * 10;
-      const price = basePrice + variation - (i * 0.1);
+      if (timeframe === "1D") {
+        date.setMinutes(date.getMinutes() - (i * 5));
+      } else if (timeframe === "1W") {
+        date.setDate(date.getDate() - i);
+      } else {
+        date.setDate(date.getDate() - i);
+      }
+      
+      const variation = (Math.random() - 0.5) * 5;
+      const price = basePrice + variation - (i * 0.01);
       
       data.push({
-        date: format(date, 'MMM dd'),
-        price: Math.max(price, basePrice * 0.8),
-        volume: Math.floor(Math.random() * 50000000) + 10000000
+        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
+        price: Math.max(price, basePrice * 0.9),
+        volume: Math.floor(Math.random() * 10000000) + 1000000
       });
     }
-    return data;
+    setChartData(data);
   };
 
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-
-  useEffect(() => {
-    const days = timeframe === "1D" ? 1 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 365;
-    setChartData(generateChartData(selectedStock, days));
-  }, [selectedStock, timeframe]);
-
-  // Mock news data
-  const newsData: NewsItem[] = [
+  const getMockNewsData = (symbol: string): NewsItem[] => [
     {
       id: "1",
-      title: "Apple Reports Strong Q4 Earnings, Beats Revenue Expectations",
-      summary: "Apple Inc. reported better-than-expected quarterly revenue driven by strong iPhone sales and services growth.",
-      source: "Financial Times",
-      publishedAt: "2024-01-15T10:30:00Z",
+      title: `${symbol} Reports Strong Quarterly Earnings`,
+      summary: `${symbol} reported better-than-expected quarterly results with strong revenue growth.`,
+      source: "Financial News",
+      publishedAt: new Date().toISOString(),
       url: "#",
       sentiment: "positive"
     },
     {
-      id: "2", 
-      title: "Tech Stocks Rally on AI Optimism",
-      summary: "Major technology stocks including Apple, Microsoft, and Google gained on renewed investor optimism about artificial intelligence applications.",
-      source: "Bloomberg",
-      publishedAt: "2024-01-15T08:45:00Z", 
-      url: "#",
-      sentiment: "positive"
-    },
-    {
-      id: "3",
-      title: "Market Volatility Expected as Fed Meeting Approaches",
-      summary: "Analysts predict increased market volatility ahead of the Federal Reserve's upcoming interest rate decision.",
-      source: "Reuters",
-      publishedAt: "2024-01-14T16:20:00Z",
+      id: "2",
+      title: "Market Volatility Affects Tech Stocks",
+      summary: "Recent market movements have impacted technology sector performance.",
+      source: "Market Watch",
+      publishedAt: new Date().toISOString(),
       url: "#",
       sentiment: "neutral"
     }
@@ -180,6 +345,64 @@ const Stocks = () => {
         : [...prev, symbol]
     );
   };
+
+  const addToWatchlist = () => {
+    if (searchQuery.trim() && !watchlist.includes(searchQuery.toUpperCase())) {
+      const symbol = searchQuery.toUpperCase();
+      setWatchlist(prev => [...prev, symbol]);
+      setSelectedStock(symbol);
+      setSearchQuery("");
+    }
+  };
+
+  // API Key Input Component
+  if (showApiKeyInput || !apiConfig.isConfigured) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Alpha Vantage API Configuration
+            </CardTitle>
+            <CardDescription>
+              Enter your Alpha Vantage API key to access live stock data
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Input
+                type="password"
+                placeholder="Enter your Alpha Vantage API key"
+                value={apiConfig.apiKey}
+                onChange={(e) => setApiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                onKeyPress={(e) => e.key === 'Enter' && handleApiKeySubmit(apiConfig.apiKey)}
+              />
+            </div>
+            <Button 
+              onClick={() => handleApiKeySubmit(apiConfig.apiKey)} 
+              className="w-full"
+              disabled={!apiConfig.apiKey.trim()}
+            >
+              Configure API Key
+            </Button>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>Don't have an API key? Get one free at:</p>
+              <a 
+                href="https://www.alphavantage.co/support/#api-key" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                alphavantage.co/support/#api-key
+              </a>
+              <p className="text-xs">Free tier: 25 requests per day</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -213,6 +436,13 @@ const Stocks = () => {
                 AI Advisor
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowApiKeyInput(true)}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </nav>
@@ -222,29 +452,43 @@ const Stocks = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Stock Market</h1>
           <p className="text-muted-foreground text-lg">
-            Live stock data, charts, and market insights
+            Live stock data powered by Alpha Vantage
           </p>
         </div>
 
-        {/* Search and Watchlist */}
+        {/* Error Alert */}
+        {error && (
+          <Alert className="mb-6" variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Search and Stock Selection */}
         <div className="mb-6 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search stocks (AAPL, GOOGL, MSFT, TSLA...)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex-1 flex gap-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Enter stock symbol (e.g., AAPL, GOOGL, MSFT...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addToWatchlist()}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={addToWatchlist} disabled={!searchQuery.trim()}>
+              Add
+            </Button>
           </div>
           <Select value={selectedStock} onValueChange={setSelectedStock}>
             <SelectTrigger className="w-full md:w-48">
               <SelectValue placeholder="Select a stock" />
             </SelectTrigger>
             <SelectContent>
-              {Object.keys(stocksData).map(symbol => (
+              {watchlist.map(symbol => (
                 <SelectItem key={symbol} value={symbol}>
-                  {symbol} - {stocksData[symbol].name}
+                  {symbol} {stocksData[symbol] ? `- ${stocksData[symbol].name}` : ''}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -263,8 +507,7 @@ const Stocks = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {watchlist.map(symbol => {
                 const stock = stocksData[symbol];
-                if (!stock) return null;
-                const isPos = stock.change >= 0;
+                const isPos = stock?.change >= 0;
                 return (
                   <div 
                     key={symbol}
@@ -276,7 +519,9 @@ const Stocks = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="font-semibold">{symbol}</div>
-                        <div className="text-sm text-muted-foreground truncate">{stock.name}</div>
+                        <div className="text-sm text-muted-foreground truncate">
+                          {stock?.name || 'Loading...'}
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
@@ -289,11 +534,20 @@ const Stocks = () => {
                         <Star className="h-4 w-4 fill-primary" />
                       </Button>
                     </div>
-                    <div className="text-xl font-bold">${stock.price.toFixed(2)}</div>
-                    <div className={`text-sm flex items-center ${isPos ? 'text-green-600' : 'text-red-600'}`}>
-                      {isPos ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                      ${Math.abs(stock.change).toFixed(2)} ({Math.abs(stock.changePercent).toFixed(2)}%)
-                    </div>
+                    {stock ? (
+                      <>
+                        <div className="text-xl font-bold">${stock.price.toFixed(2)}</div>
+                        <div className={`text-sm flex items-center ${isPos ? 'text-green-600' : 'text-red-600'}`}>
+                          {isPos ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                          ${Math.abs(stock.change).toFixed(2)} ({Math.abs(stock.changePercent).toFixed(2)}%)
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Loading...
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -309,7 +563,10 @@ const Stocks = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-2xl">{currentStock.symbol}</CardTitle>
+                    <CardTitle className="text-2xl flex items-center gap-2">
+                      {currentStock.symbol}
+                      {loading && <Loader2 className="h-5 w-5 animate-spin" />}
+                    </CardTitle>
                     <CardDescription className="text-lg">{currentStock.name}</CardDescription>
                   </div>
                   <Button
@@ -338,6 +595,7 @@ const Stocks = () => {
                       variant={timeframe === period ? "default" : "outline"}
                       size="sm"
                       onClick={() => setTimeframe(period)}
+                      disabled={chartLoading}
                     >
                       {period}
                     </Button>
@@ -346,30 +604,36 @@ const Stocks = () => {
 
                 {/* Chart */}
                 <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                      <defs>
-                        <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
-                        labelFormatter={(label) => `Date: ${label}`}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="price" 
-                        stroke={isPositive ? "#10b981" : "#ef4444"}
-                        fillOpacity={1}
-                        fill="url(#colorPrice)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {chartLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData}>
+                        <defs>
+                          <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
+                          labelFormatter={(label) => `${timeframe === '1D' ? 'Time' : 'Date'}: ${label}`}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="price" 
+                          stroke={isPositive ? "#10b981" : "#ef4444"}
+                          fillOpacity={1}
+                          fill="url(#colorPrice)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -381,28 +645,48 @@ const Stocks = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Market Cap</span>
-                  <span className="font-semibold">{formatNumber(currentStock.marketCap)}</span>
+                  <span className="text-muted-foreground">Previous Close</span>
+                  <span className="font-semibold">${currentStock.previousClose.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Open</span>
+                  <span className="font-semibold">${currentStock.open.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Day Range</span>
+                  <span className="font-semibold">${currentStock.low.toFixed(2)} - ${currentStock.high.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Volume</span>
                   <span className="font-semibold">{currentStock.volume.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">P/E Ratio</span>
-                  <span className="font-semibold">{currentStock.pe}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">52W High</span>
-                  <span className="font-semibold">${currentStock.high52Week.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">52W Low</span>
-                  <span className="font-semibold">${currentStock.low52Week.toFixed(2)}</span>
-                </div>
+                {currentStock.marketCap && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Market Cap</span>
+                    <span className="font-semibold">{formatNumber(currentStock.marketCap)}</span>
+                  </div>
+                )}
+                {currentStock.pe && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">P/E Ratio</span>
+                    <span className="font-semibold">{currentStock.pe}</span>
+                  </div>
+                )}
+                {currentStock.high52Week && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">52W High</span>
+                    <span className="font-semibold">${currentStock.high52Week.toFixed(2)}</span>
+                  </div>
+                )}
+                {currentStock.low52Week && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">52W Low</span>
+                    <span className="font-semibold">${currentStock.low52Week.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="pt-4 border-t">
                   <div className="text-xs text-muted-foreground">
-                    Last updated: {format(new Date(currentStock.lastUpdated), 'MMM dd, HH:mm')}
+                    Last updated: {format(new Date(currentStock.lastUpdated), 'MMM dd, yyyy')}
                   </div>
                 </div>
               </CardContent>
@@ -416,32 +700,41 @@ const Stocks = () => {
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
               Market News
+              {newsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             </CardTitle>
-            <CardDescription>Latest news that may impact {currentStock?.symbol || 'the market'}</CardDescription>
+            <CardDescription>Latest news for {currentStock?.symbol || 'the market'}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {newsData.map(news => (
-                <div key={news.id} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg hover:text-primary cursor-pointer">
-                      {news.title}
-                    </h3>
-                    <Badge 
-                      variant={news.sentiment === 'positive' ? 'default' : news.sentiment === 'negative' ? 'destructive' : 'secondary'}
-                    >
-                      {news.sentiment}
-                    </Badge>
+              {newsData.length > 0 ? (
+                newsData.map(news => (
+                  <div key={news.id} className="border-b pb-4 last:border-b-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-lg hover:text-primary cursor-pointer">
+                        {news.title}
+                      </h3>
+                      <Badge 
+                        variant={news.sentiment === 'positive' ? 'default' : news.sentiment === 'negative' ? 'destructive' : 'secondary'}
+                      >
+                        {news.sentiment}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground mb-3">{news.summary}</p>
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <span>{news.source} • {format(new Date(news.publishedAt), 'MMM dd, HH:mm')}</span>
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href={news.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-muted-foreground mb-3">{news.summary}</p>
-                  <div className="flex justify-between items-center text-sm text-muted-foreground">
-                    <span>{news.source} • {format(new Date(news.publishedAt), 'MMM dd, HH:mm')}</span>
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  No news available. This may be due to API rate limits.
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
