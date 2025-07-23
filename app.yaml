@@ -1,0 +1,18 @@
+runtime: nodejs20
+
+env_variables:
+  NODE_ENV: production
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+
+handlers:
+- url: /static
+  static_dir: dist/assets
+  secure: always
+
+- url: /.*
+  static_files: dist/index.html
+  upload: dist/index.html
+  secure: always

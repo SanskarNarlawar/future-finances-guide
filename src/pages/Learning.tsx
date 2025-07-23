@@ -15,6 +15,60 @@ const Learning = () => {
   const { currentLanguage, setCurrentLanguage, t } = useTranslations();
   const { toast } = useToast();
 
+  const handlePlayAudio = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Set language based on current language
+      const languageMap: { [key: string]: string } = {
+        'en': 'en-US',
+        'es': 'es-ES',
+        'fr': 'fr-FR',
+        'de': 'de-DE',
+        'hi': 'hi-IN',
+        'zh': 'zh-CN',
+        'ja': 'ja-JP'
+      };
+      
+      utterance.lang = languageMap[currentLanguage] || 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      
+      utterance.onstart = () => {
+        toast({
+          title: "Audio Started",
+          description: "Playing blog content audio...",
+        });
+      };
+      
+      utterance.onend = () => {
+        toast({
+          title: "Audio Finished",
+          description: "Finished playing audio content",
+        });
+      };
+      
+      utterance.onerror = () => {
+        toast({
+          title: "Audio Error",
+          description: "Could not play audio. Please try again.",
+          variant: "destructive",
+        });
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    } else {
+      toast({
+        title: "Not Supported",
+        description: "Text-to-speech is not supported in your browser.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Multi-language blog content
   const blogContent = {
     en: [
@@ -646,6 +700,8 @@ const Learning = () => {
                     key={blog.id} 
                     blog={blog} 
                     readMoreText={t('readMore')}
+                    onPlayAudio={() => handlePlayAudio(blog.content)}
+                    audioText="Play Audio"
                   />
                 ))}
               </div>

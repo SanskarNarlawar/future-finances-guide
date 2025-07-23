@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Clock, User, X } from "lucide-react";
+import { Calendar, Clock, User, X, Volume2 } from "lucide-react";
 
 export interface BlogPost {
   id: string;
@@ -21,9 +21,11 @@ export interface BlogPost {
 interface BlogCardProps {
   blog: BlogPost;
   readMoreText: string;
+  onPlayAudio?: () => void;
+  audioText?: string;
 }
 
-export const BlogCard = ({ blog, readMoreText }: BlogCardProps) => {
+export const BlogCard = ({ blog, readMoreText, onPlayAudio, audioText }: BlogCardProps) => {
   const [showFullBlog, setShowFullBlog] = useState(false);
 
   return (
@@ -109,13 +111,26 @@ export const BlogCard = ({ blog, readMoreText }: BlogCardProps) => {
         <CardDescription className="text-base line-clamp-3 mb-4">
           {blog.excerpt}
         </CardDescription>
+        <div className="flex gap-2">
           <Button 
             variant="outline" 
-            className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+            className="flex-1 group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
             onClick={() => setShowFullBlog(true)}
           >
             {readMoreText}
           </Button>
+          {onPlayAudio && (
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+              onClick={onPlayAudio}
+              title={audioText || "Play Audio"}
+            >
+              <Volume2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         </CardContent>
       </Card>
     </>
