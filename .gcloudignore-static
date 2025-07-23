@@ -1,0 +1,19 @@
+# Ignore everything except dist folder
+*
+!dist/
+!dist/**
+!app-static-only.yaml
+
+# Specifically ignore source files that might trigger builds
+src/
+public/
+node_modules/
+package.json
+package-lock.json
+vite.config.ts
+tailwind.config.ts
+tsconfig.json
+tsconfig.*.json
+*.md
+.env*
+.git/
