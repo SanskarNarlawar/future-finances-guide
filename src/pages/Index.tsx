@@ -48,6 +48,9 @@ const Index = () => {
             <Link to="/dashboard">
               <Button variant="outline">{t('dashboard')}</Button>
             </Link>
+            <Link to="/stocks">
+              <Button variant="outline">Stocks</Button>
+            </Link>
             <Link to="/learning">
               <Button variant="outline">{t('learning')}</Button>
             </Link>
