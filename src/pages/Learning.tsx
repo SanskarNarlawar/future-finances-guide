@@ -631,6 +631,9 @@ const Learning = () => {
               <Link to="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
               </Link>
+              <Link to="/stocks">
+                <Button variant="ghost">Stocks</Button>
+              </Link>
               <Link to="/chat">
                 <Button variant="ghost">
                   <MessageSquare className="mr-2 h-4 w-4" />

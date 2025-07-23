@@ -100,6 +100,12 @@ const Dashboard = () => {
               currentLanguage={currentLanguage}
               onLanguageChange={setCurrentLanguage}
             />
+            <Link to="/stocks">
+              <Button variant="outline">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Stocks
+              </Button>
+            </Link>
             <Link to="/learning">
               <Button variant="outline">
                 <BookOpen className="mr-2 h-4 w-4" />
