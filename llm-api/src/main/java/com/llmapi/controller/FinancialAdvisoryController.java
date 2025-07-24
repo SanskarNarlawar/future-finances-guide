@@ -34,6 +34,85 @@ public class FinancialAdvisoryController {
     private final FinancialAdvisoryService financialAdvisoryService;
     private final InvestmentGuidanceService investmentGuidanceService;
 
+    @PostMapping("/ask")
+    @Operation(
+        summary = "🚀 Quick Ask - Super Simple",
+        description = "**SIMPLEST ENDPOINT** - Just ask any financial question without any complex setup. Perfect for quick queries!",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Just your question - that's it!",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "💬 Quick Question",
+                        summary = "Just ask anything",
+                        value = """
+                        {
+                          "question": "How do I start investing with ₹10,000?"
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🏠 Home Loan Query",
+                        summary = "Ask about home loans",
+                        value = """
+                        {
+                          "question": "What documents do I need for a home loan?"
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "💰 Savings Question",
+                        summary = "Ask about savings",
+                        value = """
+                        {
+                          "question": "Which is the best savings account in India?"
+                        }
+                        """
+                    )
+                }
+            )
+        )
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "✅ Quick financial advice response",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ChatResponse.class)
+            )
+        )
+    })
+    public ResponseEntity<ChatResponse> askQuickQuestion(@RequestBody Map<String, String> request) {
+        try {
+            String question = request.get("question");
+            if (question == null || question.trim().isEmpty()) {
+                question = "Hello! How can I help you with your financial questions today?";
+            }
+            
+            // Create a simple ChatRequest for financial advisory
+            ChatRequest chatRequest = new ChatRequest();
+            chatRequest.setMessage(question);
+            chatRequest.setSessionId("quick-ask-" + System.currentTimeMillis());
+            
+            ChatResponse response = financialAdvisoryService.generateFinancialAdvice(chatRequest);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error in quick ask endpoint", e);
+            ChatResponse errorResponse = ChatResponse.builder()
+                    .id("error-" + System.currentTimeMillis())
+                    .sessionId("error-session")
+                    .message("I apologize, but I'm having trouble processing your question right now. Please try again or contact support.")
+                    .modelName("error-handler")
+                    .createdAt(java.time.LocalDateTime.now())
+                    .build();
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
     @PostMapping("/comprehensive-guidance")
     @Operation(
         summary = "🎯 Get Complete Financial & Investment Guidance",
@@ -332,10 +411,10 @@ public class FinancialAdvisoryController {
 
     @PostMapping("/chat")
     @Operation(
-        summary = "💬 Simple Chat - Ask Any Question",
-        description = "**EASY CHAT ENDPOINT** - Ask any financial question without complex profiles. Just send your message and get detailed advice. All fields except 'message' are optional.",
+        summary = "💬 Financial Advisory Chat - Simple OR Detailed",
+        description = "**FLEXIBLE CHAT ENDPOINT** - Ask any financial question with two options: \n\n**OPTION 1: Simple** - Just send your message for general advice\n**OPTION 2: Detailed** - Include financial profile for personalized recommendations\n\nAll fields except 'message' are optional.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Simple chat - only 'message' is required, everything else is optional",
+            description = "Chat with optional financial profile for personalized advice. Only 'message' is required.",
             required = true,
             content = @Content(
                 mediaType = "application/json",
@@ -395,7 +474,7 @@ public class FinancialAdvisoryController {
                         }
                         """
                     ),
-                    @ExampleObject(
+                                        @ExampleObject(
                         name = "📊 General Question",
                         summary = "Ask any financial question",
                         value = """
@@ -403,7 +482,109 @@ public class FinancialAdvisoryController {
                           "message": "What's the difference between ELSS and regular mutual funds? Which is better for tax saving?"
                         }
                         """
-                                         )
+                    ),
+                    @ExampleObject(
+                        name = "🎯 DETAILED: Investment with Profile",
+                        summary = "Personalized investment advice with profile",
+                        value = """
+                        {
+                          "message": "I'm 28 and work in tech. Should I invest in individual stocks or mutual funds? I have ₹50,000 to start with.",
+                          "session_id": "tech-professional-session",
+                          "advisory_mode": "INVESTMENT_FOCUSED",
+                          "financial_profile": {
+                            "age": 28,
+                            "income_range": "RANGE_75K_100K",
+                            "risk_tolerance": "MODERATE",
+                            "interests": ["technology", "artificial intelligence"],
+                            "current_savings": 50000,
+                            "financial_goals": ["WEALTH_BUILDING"],
+                            "employment_status": "EMPLOYED_FULL_TIME"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🏠 DETAILED: Home Buying with Profile",
+                        summary = "Detailed home purchase planning with profile",
+                        value = """
+                        {
+                          "message": "I want to buy a 3BHK flat in Bangalore worth ₹80 lakhs. I earn ₹12 LPA and have ₹15 lakhs saved. What's the best financing strategy?",
+                          "session_id": "home-buyer-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 32,
+                            "income_range": "RANGE_100K_150K",
+                            "financial_goals": ["HOME_PURCHASE"],
+                            "current_savings": 1500000,
+                            "monthly_expenses": 60000,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "MARRIED",
+                            "risk_tolerance": "MODERATE"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🚗 DETAILED: Car Purchase with Profile",
+                        summary = "Vehicle financing with detailed profile",
+                        value = """
+                        {
+                          "message": "I'm planning to buy my first car worth ₹8 lakhs. Should I take an auto loan or use my savings?",
+                          "session_id": "car-buyer-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 26,
+                            "income_range": "RANGE_50K_75K",
+                            "current_savings": 400000,
+                            "monthly_expenses": 35000,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "SINGLE",
+                            "risk_tolerance": "CONSERVATIVE"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🎓 DETAILED: Education Planning with Profile",
+                        summary = "Education financing with detailed planning",
+                        value = """
+                        {
+                          "message": "My child wants to study engineering abroad. The cost is ₹50 lakhs. How should I plan for this?",
+                          "session_id": "education-planning-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 42,
+                            "income_range": "RANGE_100K_150K",
+                            "financial_goals": ["CHILD_EDUCATION"],
+                            "current_savings": 800000,
+                            "number_of_dependents": 2,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "MARRIED",
+                            "risk_tolerance": "MODERATE"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "💼 DETAILED: Business Startup with Profile",
+                        summary = "Startup financing with detailed profile",
+                        value = """
+                        {
+                          "message": "I want to start a tech startup and need ₹25 lakhs funding. I have ₹8 lakhs saved. What are my options?",
+                          "session_id": "startup-funding-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 29,
+                            "income_range": "RANGE_75K_100K",
+                            "interests": ["technology", "entrepreneurship"],
+                            "financial_goals": ["BUSINESS_INVESTMENT"],
+                            "current_savings": 800000,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "risk_tolerance": "AGGRESSIVE"
+                          }
+                        }
+                        """
+                    )
                 }
             )
         )
