@@ -71,7 +71,23 @@ const translations = {
     portfolioHealthCheckDesc: "Assess your portfolio diversification and risk levels",
     readyToTransform: "Ready to Transform Your Financial Life?",
     joinThousands: "Join thousands of users who are already building wealth with FinanceAI",
-    startYourJourney: "Start Your Journey"
+    startYourJourney: "Start Your Journey",
+    // Chat translations
+    listening: "Listening...",
+    speakNow: "Speak now. Click the microphone again to stop.",
+    voiceInput: "Voice input:",
+    conversationLanguage: "Conversation language:",
+    voiceFeatures: "Voice Features",
+    voiceInputTitle: "🎤 Voice Input",
+    voiceInputDesc: "Click the microphone to speak your question",
+    voiceInputNotSupported: "Voice input not supported in this browser",
+    audioPlayback: "🔊 Audio Playback",
+    audioPlaybackDesc: "Click the speaker icon next to any message to hear it",
+    audioPlaybackNotSupported: "Audio playback not supported in this browser",
+    multiLanguage: "🌍 Multi-language",
+    multiLanguageDesc: "Conversation continues in the language you start with",
+    chatPlaceholder: "Ask about investments, budgeting, or financial planning... (or use voice input)",
+    listeningIndicator: "🎤 Listening... Speak now or click the microphone to stop."
   },
   es: {
     learning: "Centro de Aprendizaje",
@@ -143,7 +159,23 @@ const translations = {
     portfolioHealthCheckDesc: "Evalúa la diversificación y los niveles de riesgo de tu portafolio",
     readyToTransform: "¿Listo para Transformar tu Vida Financiera?",
     joinThousands: "Únete a miles de usuarios que ya están construyendo riqueza con FinanceAI",
-    startYourJourney: "Comenzar tu Viaje"
+    startYourJourney: "Comenzar tu Viaje",
+    // Chat translations
+    listening: "Escuchando...",
+    speakNow: "Habla ahora. Haz clic en el micrófono de nuevo para parar.",
+    voiceInput: "Entrada de voz:",
+    conversationLanguage: "Idioma de conversación:",
+    voiceFeatures: "Funciones de Voz",
+    voiceInputTitle: "🎤 Entrada de Voz",
+    voiceInputDesc: "Haz clic en el micrófono para hablar tu pregunta",
+    voiceInputNotSupported: "Entrada de voz no compatible en este navegador",
+    audioPlayback: "🔊 Reproducción de Audio",
+    audioPlaybackDesc: "Haz clic en el icono del altavoz junto a cualquier mensaje para escucharlo",
+    audioPlaybackNotSupported: "Reproducción de audio no compatible en este navegador",
+    multiLanguage: "🌍 Multi-idioma",
+    multiLanguageDesc: "La conversación continúa en el idioma con el que inicias",
+    chatPlaceholder: "Pregunta sobre inversiones, presupuestos o planificación financiera... (o usa entrada de voz)",
+    listeningIndicator: "🎤 Escuchando... Habla ahora o haz clic en el micrófono para parar."
   },
   fr: {
     learning: "Centre d'Apprentissage",
@@ -215,7 +247,23 @@ const translations = {
     portfolioHealthCheckDesc: "Évaluez la diversification et les niveaux de risque de votre portefeuille",
     readyToTransform: "Prêt à Transformer votre Vie Financière ?",
     joinThousands: "Rejoignez des milliers d'utilisateurs qui construisent déjà leur richesse avec FinanceAI",
-    startYourJourney: "Commencer votre Voyage"
+    startYourJourney: "Commencer votre Voyage",
+    // Chat translations
+    listening: "Écoute...",
+    speakNow: "Parlez maintenant. Cliquez sur le microphone à nouveau pour arrêter.",
+    voiceInput: "Entrée vocale:",
+    conversationLanguage: "Langue de conversation:",
+    voiceFeatures: "Fonctionnalités Vocales",
+    voiceInputTitle: "🎤 Entrée Vocale",
+    voiceInputDesc: "Cliquez sur le microphone pour parler votre question",
+    voiceInputNotSupported: "Entrée vocale non prise en charge dans ce navigateur",
+    audioPlayback: "🔊 Lecture Audio",
+    audioPlaybackDesc: "Cliquez sur l'icône haut-parleur à côté de n'importe quel message pour l'entendre",
+    audioPlaybackNotSupported: "Lecture audio non prise en charge dans ce navigateur",
+    multiLanguage: "🌍 Multi-langue",
+    multiLanguageDesc: "La conversation continue dans la langue avec laquelle vous commencez",
+    chatPlaceholder: "Demandez à propos d'investissements, de budgétisation ou de planification financière... (ou utilisez l'entrée vocale)",
+    listeningIndicator: "🎤 Écoute... Parlez maintenant ou cliquez sur le microphone pour arrêter."
   },
   de: {
     learning: "Lernzentrum",
