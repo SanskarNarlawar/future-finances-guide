@@ -332,156 +332,78 @@ public class FinancialAdvisoryController {
 
     @PostMapping("/chat")
     @Operation(
-        summary = "💬 Interactive Financial Advisory Chat",
-        description = "**CONVERSATIONAL ENDPOINT** - Chat with the financial advisor AI for personalized advice, questions, and guidance. Supports context-aware conversations with financial profile integration.",
+        summary = "💬 Simple Chat - Ask Any Question",
+        description = "**EASY CHAT ENDPOINT** - Ask any financial question without complex profiles. Just send your message and get detailed advice. All fields except 'message' are optional.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Chat message with optional financial profile for personalized responses",
+            description = "Simple chat - only 'message' is required, everything else is optional",
             required = true,
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = ChatRequest.class),
                 examples = {
                     @ExampleObject(
+                        name = "💬 Simple Question",
+                        summary = "Just ask your question - that's it!",
+                        value = """
+                        {
+                          "message": "I want to buy a house. What should I know about home loans?"
+                        }
+                        """
+                    ),
+                    @ExampleObject(
                         name = "💡 Investment Question",
-                        summary = "Ask specific investment questions",
+                        summary = "Ask about investments",
                         value = """
                         {
-                          "message": "I'm 28 and work in tech. Should I invest in individual stocks or mutual funds? I have ₹50,000 to start with.",
-                          "session_id": "tech-professional-session",
-                          "advisory_mode": "INVESTMENT_FOCUSED",
-                          "financial_profile": {
-                            "age": 28,
-                            "income_range": "RANGE_75K_100K",
-                            "risk_tolerance": "MODERATE",
-                            "interests": ["technology", "artificial intelligence"],
-                            "current_savings": 50000
-                          }
+                          "message": "I'm 28 and work in tech. Should I invest in individual stocks or mutual funds? I have ₹50,000 to start with."
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "🏠 Home Buying Planning",
-                        summary = "Detailed home purchase financial planning",
+                        name = "🏠 Home Buying",
+                        summary = "Ask about home buying",
                         value = """
                         {
-                          "message": "I want to buy a 3BHK flat in Bangalore worth ₹80 lakhs. I earn ₹12 LPA and have ₹15 lakhs saved. What's the best financing strategy? Should I take the maximum loan or pay more down payment?",
-                          "session_id": "home-buyer-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 32,
-                            "income_range": "RANGE_100K_150K",
-                            "financial_goals": ["HOME_PURCHASE"],
-                            "current_savings": 1500000,
-                            "monthly_expenses": 60000,
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "MARRIED"
-                          }
+                          "message": "I want to buy a 3BHK flat in Bangalore worth ₹80 lakhs. I earn ₹12 LPA and have ₹15 lakhs saved. What's the best financing strategy?"
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "🚗 Car Purchase Decision",
-                        summary = "Vehicle financing and purchase advice",
+                        name = "🚗 Car Purchase",
+                        summary = "Ask about car buying",
                         value = """
                         {
-                          "message": "I'm planning to buy my first car worth ₹8 lakhs. Should I take an auto loan or use my savings? I also want to know about insurance, maintenance costs, and whether to buy new or used.",
-                          "session_id": "car-buyer-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 26,
-                            "income_range": "RANGE_50K_75K",
-                            "current_savings": 400000,
-                            "monthly_expenses": 35000,
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "SINGLE"
-                          }
+                          "message": "I'm planning to buy my first car worth ₹8 lakhs. Should I take an auto loan or use my savings?"
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "🎓 Education Loan Planning",
-                        summary = "Education financing for higher studies",
+                        name = "🎓 Education Planning",
+                        summary = "Ask about education costs",
                         value = """
                         {
-                          "message": "My child is 15 years old and I want to send them abroad for engineering studies. The estimated cost is ₹50 lakhs. How should I plan and save for this? Should I consider education loans?",
-                          "session_id": "education-planning-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 42,
-                            "income_range": "RANGE_100K_150K",
-                            "financial_goals": ["CHILD_EDUCATION"],
-                            "current_savings": 800000,
-                            "number_of_dependents": 2,
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "MARRIED"
-                          }
+                          "message": "My child wants to study engineering abroad. The cost is ₹50 lakhs. How should I plan for this?"
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "💼 Business Startup Funding",
-                        summary = "Startup and business financing advice",
+                        name = "💼 Business Startup",
+                        summary = "Ask about starting a business",
                         value = """
                         {
-                          "message": "I want to start a tech startup and need ₹25 lakhs initial funding. I have ₹8 lakhs saved. What are my options - personal loan, business loan, or should I look for investors? What about business registration and compliance costs?",
-                          "session_id": "startup-funding-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 29,
-                            "income_range": "RANGE_75K_100K",
-                            "interests": ["technology", "entrepreneurship"],
-                            "financial_goals": ["BUSINESS_INVESTMENT"],
-                            "current_savings": 800000,
-                            "employment_status": "EMPLOYED_FULL_TIME"
-                          }
+                          "message": "I want to start a tech startup and need ₹25 lakhs funding. I have ₹8 lakhs saved. What are my options?"
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "🏠 Home Buying Query",
-                        summary = "Questions about home purchase planning",
+                        name = "📊 General Question",
+                        summary = "Ask any financial question",
                         value = """
                         {
-                          "message": "I want to buy a house in 5 years. How should I plan my investments and savings?",
-                          "session_id": "home-buyer-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 32,
-                            "income_range": "RANGE_100K_150K",
-                            "financial_goals": ["HOME_PURCHASE"],
-                            "current_savings": 300000
-                          }
+                          "message": "What's the difference between ELSS and regular mutual funds? Which is better for tax saving?"
                         }
                         """
-                    ),
-                    @ExampleObject(
-                        name = "🎯 Retirement Planning",
-                        summary = "Retirement planning discussions",
-                        value = """
-                        {
-                          "message": "I'm 45 and want to retire by 55. Am I on track? What should I change in my investment strategy?",
-                          "session_id": "early-retirement-session",
-                          "advisory_mode": "RETIREMENT_PLANNING",
-                          "financial_profile": {
-                            "age": 45,
-                            "retirement_age_target": 55,
-                            "current_savings": 1500000,
-                            "risk_tolerance": "MODERATE"
-                          }
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "📊 General Financial Advice",
-                        summary = "General financial questions",
-                        value = """
-                        {
-                          "message": "What's the difference between ELSS and regular mutual funds? Which is better for tax saving?",
-                          "session_id": "general-query-session",
-                          "advisory_mode": "GENERAL"
-                        }
-                        """
-                    )
+                                         )
                 }
             )
         )

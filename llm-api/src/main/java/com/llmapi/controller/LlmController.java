@@ -30,11 +30,84 @@ import java.util.Map;
 public class LlmController {
 
     private final LlmService llmService;
-
-    @PostMapping("/chat")
+    
+    @PostMapping("/ask")
     @Operation(
-        summary = "Generate chat response",
-        description = "Send a message to the LLM and get a response. Supports various models and configuration options.",
+        summary = "🚀 Ask Any Question - Super Simple",
+        description = "**SIMPLEST ENDPOINT** - Just send your question as plain text and get detailed financial advice. No JSON, no complex setup!",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Just your question as plain text",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "Simple Question",
+                        summary = "Just ask your question",
+                        value = """
+                        {
+                          "question": "I want to buy a house. What should I know about home loans?"
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "Investment Question", 
+                        summary = "Ask about investments",
+                        value = """
+                        {
+                          "question": "Should I invest in mutual funds or stocks?"
+                        }
+                        """
+                    )
+                }
+            )
+        )
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "✅ Simple response with detailed advice",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ChatResponse.class)
+            )
+        )
+    })
+    public ResponseEntity<ChatResponse> askQuestion(@RequestBody Map<String, String> request) {
+        try {
+            String question = request.get("question");
+            if (question == null || question.trim().isEmpty()) {
+                question = "Hello! How can I help you with your financial questions today?";
+            }
+            
+            // Create a simple ChatRequest
+            ChatRequest chatRequest = new ChatRequest();
+            chatRequest.setMessage(question);
+            chatRequest.setSessionId("simple-" + System.currentTimeMillis());
+            chatRequest.setModelName("gpt-3.5-turbo");
+            chatRequest.setMaxTokens(1500);
+            chatRequest.setTemperature(0.7);
+            
+            ChatResponse response = llmService.generateResponse(chatRequest);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error in simple ask endpoint", e);
+            ChatResponse errorResponse = ChatResponse.builder()
+                    .id("error-" + System.currentTimeMillis())
+                    .sessionId("error-session")
+                    .message("I apologize, but I'm having trouble processing your question right now. Please try again or contact support.")
+                    .modelName("error-handler")
+                    .createdAt(java.time.LocalDateTime.now())
+                    .build();
+            return ResponseEntity.ok(errorResponse);
+        }
+    }
+
+    @PostMapping("/simple-chat")
+    @Operation(
+        summary = "💬 Simple Chat - Ask Anything",
+        description = "**EASIEST ENDPOINT** - Just send any message and get a response. No complex setup required - perfect for quick questions!",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Chat request with message and configuration",
             required = true,

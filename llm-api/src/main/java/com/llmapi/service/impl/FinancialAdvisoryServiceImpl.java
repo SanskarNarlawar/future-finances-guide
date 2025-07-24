@@ -1151,6 +1151,8 @@ public class FinancialAdvisoryServiceImpl implements FinancialAdvisoryService {
         // Add personalized greeting if profile is available
         if (request.getFinancialProfile() != null && request.getFinancialProfile().getAge() != null) {
             response.append("🎯 **Personalized Financial Advice for You**\n\n");
+        } else {
+            response.append("💡 **Financial Advisory Response**\n\n");
         }
         
         // Detect question type and generate specific response
