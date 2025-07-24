@@ -468,14 +468,19 @@ public class FinancialAdvisoryServiceImpl implements FinancialAdvisoryService {
         prompt.append("USER QUESTION: ").append(request.getMessage()).append("\n\n");
         
         // Add response guidelines
-        prompt.append("RESPONSE GUIDELINES:\n");
-        prompt.append("1. Provide specific, actionable advice tailored to the user's profile\n");
-        prompt.append("2. Include relevant calculations, timelines, and financial projections when applicable\n");
-        prompt.append("3. Mention specific Indian financial products, banks, and investment options\n");
-        prompt.append("4. Consider tax implications and regulatory aspects in India\n");
-        prompt.append("5. Provide step-by-step action plans where appropriate\n");
-        prompt.append("6. Include important disclaimers about financial risks\n");
-        prompt.append("7. Use emojis and formatting to make the response engaging and easy to read\n\n");
+        prompt.append("RESPONSE GUIDELINES - PROVIDE MAXIMUM SPECIFIC DETAILS:\n");
+        prompt.append("1. EXACT AMOUNTS: Always provide specific rupee amounts, EMI calculations, and percentage breakdowns\n");
+        prompt.append("2. SPECIFIC LOCATIONS: Mention exact cities, areas, and locations with current market rates\n");
+        prompt.append("3. BANK/INSTITUTION NAMES: List specific banks, colleges, companies with their current rates/fees\n");
+        prompt.append("4. TIMELINES: Provide exact timeframes, deadlines, and when to take specific actions\n");
+        prompt.append("5. CALCULATIONS: Show detailed EMI calculations, interest costs, and total amounts\n");
+        prompt.append("6. COMPARATIVE ANALYSIS: Compare multiple options with pros/cons and specific numbers\n");
+        prompt.append("7. STEP-BY-STEP PLANS: Provide detailed action plans with specific deadlines and amounts\n");
+        prompt.append("8. CURRENT MARKET DATA: Use the provided 2024 market data, rates, and pricing information\n");
+        prompt.append("9. MULTIPLE OPTIONS: Present 2-3 specific options with detailed analysis of each\n");
+        prompt.append("10. PROFESSIONAL FORMATTING: Use emojis, bullet points, and clear sections for readability\n");
+        prompt.append("11. RISK ANALYSIS: Quantify risks with specific percentages and scenarios\n");
+        prompt.append("12. TAX IMPLICATIONS: Calculate exact tax savings and implications with specific amounts\n\n");
         
         prompt.append("Please provide comprehensive financial advice:");
         
@@ -573,129 +578,509 @@ public class FinancialAdvisoryServiceImpl implements FinancialAdvisoryService {
     private String getSpecializedContext(String questionType) {
         return switch (questionType) {
             case "REAL_ESTATE" -> """
-                REAL ESTATE & PROPERTY EXPERTISE:
-                - Home loan eligibility, interest rates, and EMI calculations
-                - Property valuation, location analysis, and market trends
-                - Down payment planning and funding strategies
-                - Stamp duty, registration costs, and hidden expenses
-                - RERA compliance, legal verification, and documentation
-                - Property investment vs. self-occupation analysis
-                - Tax benefits under Section 80C, 24(b), and capital gains
-                - Home insurance and property maintenance costs
-                - Rental yield calculations and property management
-                - Real estate market cycles and timing considerations
+                REAL ESTATE & PROPERTY EXPERTISE WITH DETAILED SPECIFICS:
+                
+                CURRENT MARKET DATA & PRICING (2024):
+                - Mumbai: ₹15,000-25,000/sq ft (Andheri), ₹35,000-50,000/sq ft (Bandra/BKC)
+                - Bangalore: ₹6,000-12,000/sq ft (Electronic City), ₹12,000-18,000/sq ft (Koramangala)
+                - Delhi NCR: ₹8,000-15,000/sq ft (Noida), ₹15,000-25,000/sq ft (Gurgaon Golf Course Road)
+                - Pune: ₹5,500-9,000/sq ft (Hinjewadi), ₹8,000-12,000/sq ft (Koregaon Park)
+                - Chennai: ₹4,500-8,000/sq ft (OMR), ₹7,000-12,000/sq ft (Adyar)
+                - Hyderabad: ₹4,000-7,500/sq ft (Gachibowli), ₹6,000-10,000/sq ft (Jubilee Hills)
+                
+                HOME LOAN SPECIFICS:
+                - SBI Home Loan: 8.50%-9.15% (varies by profile), Max: ₹10 crores, Tenure: 30 years
+                - HDFC Home Loan: 8.60%-9.50%, Processing fee: 0.5% of loan amount
+                - ICICI Home Loan: 8.75%-9.25%, Pre-approved customers get 0.05% discount
+                - Axis Bank: 8.75%-9.40%, Special rates for women borrowers (0.05% discount)
+                - LIC Housing: 8.40%-8.90% (lowest rates), Slower processing
+                
+                DETAILED COST BREAKDOWN:
+                - Stamp Duty: 5-7% of property value (varies by state)
+                - Registration: 1-2% of property value
+                - Home Loan Processing: 0.25-0.50% of loan amount
+                - Legal Verification: ₹15,000-25,000
+                - Home Insurance: ₹3,000-8,000/year
+                - Society Maintenance: ₹2-5/sq ft/month
+                - Property Tax: 0.05-0.20% of property value annually
+                
+                BEST LOCATIONS BY BUDGET & GROWTH:
+                - Under ₹50L: Noida Extension, Panvel (Mumbai), Electronic City (Bangalore)
+                - ₹50L-1Cr: Greater Noida, Thane, Whitefield (Bangalore), Gachibowli (Hyderabad)
+                - ₹1Cr-2Cr: Noida Sectors 137-144, Powai (Mumbai), Koramangala (Bangalore)
+                - Above ₹2Cr: Gurgaon Golf Course, Lower Parel (Mumbai), UB City area (Bangalore)
+                
+                TIMING & INVESTMENT STRATEGY:
+                - Best time to buy: Post-monsoon (Oct-Dec) for better deals
+                - Under-construction vs Ready: Save 10-15% on under-construction, get possession in 2-3 years
+                - Rental yield expectations: 2-4% in metros, 4-6% in tier-2 cities
+                - Capital appreciation: 5-8% annually in good locations
                 """;
                 
             case "VEHICLE_FINANCE" -> """
-                VEHICLE FINANCING EXPERTISE:
-                - Auto loan vs. personal loan comparison
-                - Down payment optimization and loan tenure planning
-                - Interest rate negotiations and bank comparisons
-                - Vehicle insurance, maintenance, and depreciation costs
-                - New vs. used vehicle financial analysis
-                - Electric vehicle incentives and financing options
-                - Vehicle loan prepayment strategies
-                - Two-wheeler vs. four-wheeler financing decisions
-                - Commercial vehicle financing for business use
-                - Vehicle upgrade and replacement planning
-                """;
+                VEHICLE FINANCING WITH EXACT CALCULATIONS & RECOMMENDATIONS:
+                
+                CURRENT AUTO LOAN RATES (2024):
+                - SBI Auto Loan: 8.70%-9.70%, Max tenure: 7 years, Processing: ₹2,500 + GST
+                - HDFC Bank: 8.75%-16.00% (varies by vehicle age), Max: ₹1 crore
+                - ICICI Bank: 8.75%-9.50% for new cars, 9.75%-12.50% for used cars
+                - Axis Bank: 8.75%-9.25%, Special rates for premium cars
+                - Mahindra Finance: 8.90%-18.00%, Good for commercial vehicles
+                
+                DETAILED COST ANALYSIS BY VEHICLE CATEGORY:
+                
+                HATCHBACK (₹5-8 Lakhs):
+                - Maruti Swift: ₹6.5L, EMI: ₹12,500 (5yr), Insurance: ₹25,000/yr, Maintenance: ₹25,000/yr
+                - Hyundai i20: ₹7.5L, EMI: ₹14,400 (5yr), Insurance: ₹28,000/yr, Maintenance: ₹28,000/yr
+                - Tata Altroz: ₹6.8L, EMI: ₹13,100 (5yr), Insurance: ₹26,000/yr, Maintenance: ₹26,000/yr
+                
+                SEDAN (₹10-15 Lakhs):
+                - Honda City: ₹12L, EMI: ₹23,100 (5yr), Insurance: ₹35,000/yr, Maintenance: ₹35,000/yr
+                - Hyundai Verna: ₹11.5L, EMI: ₹22,100 (5yr), Insurance: ₹33,000/yr, Maintenance: ₹32,000/yr
+                - Maruti Ciaz: ₹9.5L, EMI: ₹18,300 (5yr), Insurance: ₹30,000/yr, Maintenance: ₹28,000/yr
+                
+                SUV (₹15-25 Lakhs):
+                - Hyundai Creta: ₹18L, EMI: ₹34,600 (5yr), Insurance: ₹45,000/yr, Maintenance: ₹40,000/yr
+                - Tata Harrier: ₹16.5L, EMI: ₹31,700 (5yr), Insurance: ₹42,000/yr, Maintenance: ₹38,000/yr
+                - Mahindra XUV700: ₹15L, EMI: ₹28,800 (5yr), Insurance: ₹40,000/yr, Maintenance: ₹35,000/yr
+                
+                ELECTRIC VEHICLES (Government Incentives):
+                - Tata Nexon EV: ₹15L (after ₹1.5L subsidy), Running cost: ₹1.5/km vs ₹6/km petrol
+                - MG ZS EV: ₹22L (after subsidy), Home charging cost: ₹8-10/100km
+                - Hyundai Kona: ₹24L (after subsidy), Range: 452km, Charging time: 6 hours
+                
+                OPTIMAL FINANCING STRATEGY:
+                - Down payment: 20-25% to get best rates and lower EMI
+                - Loan tenure: 5 years optimal (balance of EMI and interest cost)
+                - Pre-closure: After 1 year to save interest (check pre-closure charges)
+                                 - Insurance: Comprehensive for first 5 years, third-party after that
+                 """;
                 
             case "LOAN_FINANCE" -> """
-                LOAN & CREDIT EXPERTISE:
-                - Personal loan, business loan, and specialized lending options
-                - Interest rate types (fixed vs. floating) and negotiations
-                - EMI calculations, loan tenure optimization, and prepayment strategies
-                - Credit score improvement and loan eligibility enhancement
-                - Loan consolidation and debt restructuring options
-                - Collateral vs. unsecured loan considerations
-                - Co-applicant benefits and joint loan applications
-                - Loan insurance and protection schemes
-                - Balance transfer options and refinancing strategies
-                - Default management and legal implications
-                """;
+                LOAN & CREDIT EXPERTISE WITH DETAILED RATES & CALCULATIONS:
                 
-            case "EDUCATION_PLANNING" -> """
-                EDUCATION FINANCING EXPERTISE:
-                - Education loan eligibility, limits, and interest rates
-                - Collateral vs. non-collateral education loans
-                - Study abroad financing and forex considerations
-                - Education savings plans and child-specific investments
-                - Scholarship opportunities and grant applications
-                - Professional course financing (MBA, medical, engineering)
-                - Education insurance and student protection plans
-                - Tax benefits on education expenses and loan interest
-                - Career ROI analysis and course selection guidance
-                - Education inflation planning and corpus calculation
-                """;
+                PERSONAL LOAN RATES (2024):
+                - SBI Personal Loan: ₹25K-20L, 11.15%-15.65% interest, 6-year tenure, Processing: ₹2,500
+                - HDFC Personal Loan: ₹50K-40L, 10.75%-21% interest, Salary account holders get 0.5% discount
+                - ICICI Personal Loan: ₹50K-25L, 10.75%-19% interest, Pre-approved customers get instant approval
+                - Axis Bank: ₹1L-15L, 11%-22% interest, Digital process with 24-hour approval
+                - Bajaj Finserv: ₹1L-25L, 11%-24% interest, Minimal documentation, Quick disbursal
                 
-            case "BUSINESS_FINANCE" -> """
-                BUSINESS & ENTREPRENEURSHIP EXPERTISE:
-                - Startup funding options (bootstrapping, angel investors, VCs)
-                - Business loan types and eligibility criteria
-                - Working capital management and cash flow planning
-                - Business registration, compliance, and tax planning
-                - Partnership vs. proprietorship vs. company structures
-                - Business insurance and risk management
-                - Equipment financing and asset acquisition strategies
-                - Export-import financing and trade finance
-                - Business expansion funding and scaling strategies
-                - Exit planning and business valuation methods
+                DETAILED EMI CALCULATIONS:
+                - ₹5L loan @ 12% for 3 years: EMI ₹16,607, Total interest ₹97,852
+                - ₹10L loan @ 12% for 5 years: EMI ₹22,244, Total interest ₹3,34,640
+                - ₹15L loan @ 14% for 5 years: EMI ₹34,859, Total interest ₹6,91,540
+                
+                CREDIT SCORE IMPACT:
+                - Above 750: Best rates (10.75%-12%)
+                - 700-750: Standard rates (12%-16%)
+                - 650-700: Higher rates (16%-20%)
+                - Below 650: Difficult approval, rates 20%+
+                
+                LOAN CONSOLIDATION OPTIONS:
+                - Balance transfer: Save 2-4% interest on existing loans
+                - Top-up loans: Additional 20-30% of existing loan amount
+                - Debt consolidation: Combine multiple loans into single EMI
+                
+                PREPAYMENT STRATEGY:
+                - No prepayment charges after 1 year for most banks
+                - Prepay high-interest loans first
+                - Use bonus/windfall for prepayment to save significant interest
                 """;
                 
             case "LIFE_EVENTS" -> """
-                LIFE EVENT FINANCIAL PLANNING:
-                - Marriage and wedding expense planning
-                - Joint financial planning for couples
-                - Family protection through insurance and investments
-                - Maternity and childcare financial preparation
-                - Elder care and parents' financial support
-                - Divorce financial planning and asset division
-                - Emergency planning for health and job loss
-                - Relocation and job change financial management
-                - Festival and celebration budgeting
-                - Legacy planning and wealth transfer strategies
+                LIFE EVENT FINANCIAL PLANNING WITH SPECIFIC COSTS:
+                
+                WEDDING PLANNING COSTS:
+                - Budget Wedding (100 guests): ₹3-8L (venue, catering, photography, decoration)
+                - Mid-range Wedding (200-300 guests): ₹8-20L (good venue, designer outfits, elaborate setup)
+                - Luxury Wedding (500+ guests): ₹20L-1Cr+ (premium venues, destination wedding, celebrity management)
+                
+                DETAILED WEDDING EXPENSE BREAKDOWN:
+                - Venue & Catering: 40-50% of total budget
+                - Photography & Videography: 8-12% of budget
+                - Decoration & Flowers: 10-15% of budget
+                - Outfits & Jewelry: 15-20% of budget
+                - Music & Entertainment: 5-10% of budget
+                - Miscellaneous: 10-15% of budget
+                
+                MATERNITY & CHILDCARE COSTS:
+                - Normal delivery (private hospital): ₹50,000-1.5L
+                - C-section delivery: ₹1L-3L
+                - Monthly childcare expenses: ₹15,000-30,000 (diapers, formula, medical)
+                - Annual school fees: ₹50,000-3L (good private schools)
+                - Child insurance: ₹5,000-15,000/year premium
+                
+                ELDER CARE PLANNING:
+                - Home nursing: ₹15,000-25,000/month
+                - Assisted living facility: ₹25,000-50,000/month
+                - Medical expenses: ₹1-3L/year (including medications)
+                - Health insurance for seniors: ₹15,000-40,000/year premium
+                
+                EMERGENCY FUND FOR LIFE EVENTS:
+                - Job loss: 12 months of expenses (₹6-12L typically)
+                - Medical emergency: ₹5-10L additional to health insurance
+                - Family emergencies: ₹2-5L liquid funds
+                - Natural disasters: ₹1-3L for immediate needs
+                """;
+                
+            case "EDUCATION_PLANNING" -> """
+                EDUCATION FINANCING WITH SPECIFIC COLLEGES, COSTS & LOAN DETAILS:
+                
+                TOP ENGINEERING COLLEGES & EXACT COSTS (2024):
+                
+                IITs (Indian Institute of Technology):
+                - IIT Bombay/Delhi/Madras: ₹2.5L/year tuition + ₹1.5L/year hostel = ₹16L total (4 years)
+                - IIT Kharagpur/Kanpur/Roorkee: ₹2.2L/year tuition + ₹1.2L/year hostel = ₹13.6L total
+                - New IITs (Indore/Hyderabad/Gandhi Nagar): ₹2L/year tuition + ₹1L/year hostel = ₹12L total
+                
+                NITs (National Institute of Technology):
+                - NIT Trichy/Warangal/Surathkal: ₹1.8L/year tuition + ₹80K/year hostel = ₹10.3L total
+                - Other NITs: ₹1.5L/year tuition + ₹70K/year hostel = ₹8.8L total
+                
+                PRIVATE ENGINEERING COLLEGES:
+                - BITS Pilani: ₹4.5L/year tuition + ₹1.5L/year hostel = ₹24L total
+                - VIT Vellore: ₹2L/year tuition + ₹1L/year hostel = ₹12L total
+                - Manipal: ₹3.5L/year tuition + ₹1.2L/year hostel = ₹18.8L total
+                - SRM Chennai: ₹2.5L/year tuition + ₹80K/year hostel = ₹13.2L total
+                
+                MEDICAL COLLEGES:
+                - AIIMS Delhi: ₹5,000/year (almost free) + ₹20K/year hostel = ₹1.25L total (5.5 years)
+                - Government Medical Colleges: ₹50K/year + ₹30K/year hostel = ₹4.4L total
+                - Private Medical Colleges: ₹15-25L/year = ₹80L-1.4Cr total
+                
+                MBA COLLEGES & COSTS:
+                - IIM Ahmedabad/Bangalore/Calcutta: ₹25L total fees (2 years)
+                - IIM Lucknow/Indore/Kozhikode: ₹22L total fees
+                - ISB Hyderabad: ₹36L total fees (1 year)
+                - XLRI Jamshedpur: ₹26L total fees
+                - Private MBA: ₹8-15L total fees
+                
+                STUDY ABROAD COSTS:
+                
+                USA (Engineering/MBA):
+                - Top Universities (MIT/Stanford): $60,000-80,000/year = ₹50-65L/year
+                - State Universities: $25,000-35,000/year = ₹20-28L/year
+                - Living expenses: $15,000-20,000/year = ₹12-16L/year
+                - Total for 2-year Masters: ₹65L-1.6Cr
+                
+                UK (Engineering/MBA):
+                - Oxford/Cambridge: £35,000-45,000/year = ₹35-45L/year
+                - Other top universities: £20,000-30,000/year = ₹20-30L/year
+                - Living expenses: £12,000-15,000/year = ₹12-15L/year
+                - Total for 1-year Masters: ₹32-60L
+                
+                CANADA (Engineering/MBA):
+                - Top universities: CAD 35,000-50,000/year = ₹21-30L/year
+                - Living expenses: CAD 15,000-20,000/year = ₹9-12L/year
+                - Total for 2-year Masters: ₹60-84L
+                
+                EDUCATION LOAN DETAILS:
+                
+                GOVERNMENT BANKS:
+                - SBI Education Loan: Up to ₹1.5Cr, 7.50%-10.50% interest, 15-year tenure
+                - Bank of Baroda: Up to ₹1Cr, 7.85%-9.85% interest, Collateral needed above ₹7.5L
+                - Canara Bank: Up to ₹1Cr, 8.50%-9.50% interest, Processing fee: ₹10,000
+                
+                PRIVATE BANKS:
+                - HDFC Credila: Up to ₹1.5Cr, 9.50%-13.50% interest, No collateral up to ₹40L
+                - Axis Bank: Up to ₹75L, 10.75%-13.25% interest, Quick processing
+                - ICICI Bank: Up to ₹1Cr, 10.50%-11.50% interest, Covers 100% expenses
+                
+                SCHOLARSHIP OPPORTUNITIES:
+                - Merit-cum-Means: ₹20,000-80,000/year for economically weaker students
+                - National Talent Search: ₹1,250/month for Class 11-12, ₹2,000/month for graduation
+                - Kishore Vaigyanik Protsahan Yojana: ₹7,000/month + annual grant
+                - Corporate Scholarships: Tata, Reliance, Aditya Birla (₹50,000-2L/year)
+                
+                OPTIMAL EDUCATION FUNDING STRATEGY:
+                - Start SIP 10 years before: ₹10,000/month SIP can create ₹20L corpus
+                - Education loan for 70-80% of expenses, self-funding for 20-30%
+                - Choose government banks for lower interest rates
+                - Claim tax benefits under Section 80E (interest deduction)
+                """;
+                
+            case "BUSINESS_FINANCE" -> """
+                BUSINESS FINANCING WITH DETAILED STARTUP COSTS & FUNDING OPTIONS:
+                
+                STARTUP COSTS BY BUSINESS TYPE:
+                
+                TECH STARTUP (App/Software):
+                - Office setup (co-working): ₹15,000-25,000/month for 5-10 people
+                - Technology infrastructure: ₹2-5L (servers, software licenses, development tools)
+                - Team salaries (6 months): ₹15-30L (2-3 developers, 1 designer, 1 marketing)
+                - Legal & compliance: ₹50,000-1L (company registration, IP, contracts)
+                - Marketing & customer acquisition: ₹5-10L (first 6 months)
+                - Working capital: ₹3-5L
+                - Total requirement: ₹25-50L for first year
+                
+                RESTAURANT/FOOD BUSINESS:
+                - Restaurant setup (500 sq ft): ₹8-15L (interior, kitchen equipment, furniture)
+                - License & permits: ₹50,000-1L (FSSAI, fire NOC, liquor license if applicable)
+                - Initial inventory: ₹1-2L
+                - Staff salaries (3 months): ₹3-5L (chef, waiters, manager)
+                - Marketing & branding: ₹2-3L
+                - Working capital: ₹2-3L
+                - Total requirement: ₹16-30L
+                
+                E-COMMERCE BUSINESS:
+                - Inventory (initial stock): ₹5-15L
+                - Warehouse setup: ₹2-5L
+                - Technology platform: ₹3-8L (website, app, integrations)
+                - Marketing (first 6 months): ₹5-10L
+                - Team & operations: ₹8-15L
+                - Working capital: ₹5-10L
+                - Total requirement: ₹28-63L
+                
+                MANUFACTURING BUSINESS:
+                - Machinery & equipment: ₹10-50L (depends on industry)
+                - Factory setup: ₹5-20L (rent, utilities, setup)
+                - Raw material inventory: ₹3-10L
+                - Compliance & licenses: ₹1-3L
+                - Working capital: ₹5-15L
+                - Total requirement: ₹24-98L
+                
+                DETAILED FUNDING OPTIONS:
+                
+                BOOTSTRAPPING:
+                - Personal savings: Use 60-70% of available funds, keep 30-40% as emergency
+                - Friends & family: ₹5-25L typically, 0-5% interest, flexible terms
+                - Revenue-based: Start small, reinvest profits for growth
+                
+                GOVERNMENT SCHEMES:
+                - Startup India Seed Fund: Up to ₹50L grant + ₹2Cr debt
+                - MUDRA Loan: Up to ₹10L (Shishu: ₹50K, Kishore: ₹5L, Tarun: ₹10L)
+                - Stand-up India: ₹10L-1Cr for SC/ST/Women entrepreneurs
+                - SIDBI Loans: ₹5L-100Cr for MSMEs, 8.50%-12% interest
+                
+                BANK LOANS:
+                - SBI Business Loan: ₹1L-200Cr, 8.50%-12.50% interest, 10-year tenure
+                - HDFC Business Loan: ₹1L-75Cr, 11%-17% interest, Quick processing
+                - ICICI Business Loan: ₹10L-150Cr, 10.75%-16% interest, Minimal documentation
+                - Axis Bank: ₹5L-50Cr, 11.25%-16.50% interest, Collateral-free up to ₹1Cr
+                
+                ANGEL INVESTORS & VCs:
+                - Angel investment: ₹25L-5Cr, 5-25% equity, Individual investors
+                - Seed funding: ₹50L-10Cr, 10-30% equity, Early-stage VCs
+                - Series A: ₹5Cr-50Cr, 15-35% equity, Established VCs
+                - Series B & beyond: ₹25Cr+, varies by valuation
+                
+                TOP ANGEL INVESTOR NETWORKS:
+                - Indian Angel Network: 500+ angels, ₹25L-5Cr investments
+                - Mumbai Angels: 200+ angels, focus on tech startups
+                - Chennai Angels: Strong in healthcare & tech
+                - Hyderabad Angels: Focus on B2B and enterprise
+                
+                MAJOR VC FIRMS:
+                - Sequoia Capital: $100K-$100M, focus on tech and consumer
+                - Accel Partners: $500K-$25M, early to growth stage
+                - Matrix Partners: $1M-$15M, consumer and enterprise
+                - Kalaari Capital: $500K-$10M, early-stage focus
+                
+                BUSINESS REGISTRATION COSTS:
+                - Private Limited Company: ₹15,000-25,000 (including professional fees)
+                - LLP Registration: ₹10,000-15,000
+                - Partnership Firm: ₹5,000-8,000
+                - Sole Proprietorship: ₹2,000-5,000
+                - GST Registration: Free (mandatory if turnover > ₹20L)
+                - Trade License: ₹5,000-15,000 (varies by city)
+                
+                OPTIMAL FUNDING TIMELINE:
+                - Month 1-3: Bootstrap with personal funds + friends/family
+                - Month 4-12: Government schemes + bank loans for working capital
+                - Month 12-24: Angel investors for scaling (if traction exists)
+                - Month 24+: VC funding for rapid expansion
                 """;
                 
             case "TRAVEL_PLANNING" -> """
-                TRAVEL & LIFESTYLE FINANCING:
-                - Travel savings and vacation fund planning
-                - Travel insurance and international coverage
-                - Forex planning and currency exchange strategies
-                - Travel loans and credit card benefits
-                - International investment and NRI planning
-                - Travel budgeting and expense management
-                - Frequent traveler financial optimization
-                - Business travel expense management
-                - Adventure and luxury travel financing
-                - Travel emergency fund and contingency planning
-                """;
+                TRAVEL FINANCING WITH DETAILED COSTS & DESTINATIONS:
+                
+                DOMESTIC TRAVEL COSTS (Per Person):
+                
+                GOA (5 Days):
+                - Flight: ₹8,000-15,000 (Delhi/Mumbai to Goa)
+                - Accommodation: ₹3,000-8,000/night (beach resort)
+                - Food: ₹1,500-3,000/day
+                - Activities: ₹5,000-10,000 (water sports, sightseeing)
+                - Total: ₹25,000-60,000
+                
+                KERALA (7 Days):
+                - Flight: ₹6,000-12,000 (to Kochi/Trivandrum)
+                - Houseboat: ₹8,000-15,000/night (Alleppey)
+                - Hill station stay: ₹4,000-8,000/night (Munnar)
+                - Food & transport: ₹2,000-3,500/day
+                - Total: ₹35,000-70,000
+                
+                RAJASTHAN (10 Days):
+                - Flight: ₹8,000-15,000 (to Jaipur/Udaipur)
+                - Heritage hotels: ₹5,000-15,000/night
+                - Car rental: ₹2,500-4,000/day with driver
+                - Food & activities: ₹2,000-4,000/day
+                - Total: ₹50,000-1,20,000
+                
+                INTERNATIONAL TRAVEL COSTS:
+                
+                SOUTHEAST ASIA:
+                
+                THAILAND (7 Days):
+                - Flight: ₹25,000-40,000 (Delhi/Mumbai to Bangkok)
+                - Accommodation: ₹2,000-6,000/night (beach resort)
+                - Food: ₹1,000-2,500/day
+                - Activities: ₹15,000-25,000 (island hopping, temples)
+                - Visa: ₹2,000 (on arrival)
+                - Total: ₹60,000-1,20,000
+                
+                SINGAPORE (5 Days):
+                - Flight: ₹30,000-50,000
+                - Hotel: ₹8,000-15,000/night (city center)
+                - Food: ₹2,500-4,000/day
+                - Activities: ₹20,000-30,000 (Universal Studios, Marina Bay)
+                - Total: ₹80,000-1,50,000
+                
+                EUROPE:
+                
+                EUROPE TOUR (15 Days, 5 Countries):
+                - Flight: ₹60,000-1,00,000 (round trip)
+                - Accommodation: ₹4,000-8,000/night (3-4 star hotels)
+                - Food: ₹3,000-5,000/day
+                - Transport: ₹25,000-40,000 (Eurail pass + local transport)
+                - Activities: ₹50,000-80,000 (museums, tours, experiences)
+                - Visa: ₹8,000 (Schengen)
+                - Total: ₹2,00,000-4,00,000
+                
+                UK (10 Days):
+                - Flight: ₹50,000-80,000
+                - Accommodation: ₹8,000-15,000/night (London)
+                - Food: ₹3,500-6,000/day
+                - Transport: ₹15,000-25,000 (Oyster card + trains)
+                - Activities: ₹40,000-60,000
+                - Visa: ₹12,000
+                - Total: ₹1,80,000-3,20,000
+                
+                USA (12 Days):
+                - Flight: ₹80,000-1,20,000
+                - Accommodation: ₹10,000-20,000/night (major cities)
+                - Food: ₹4,000-7,000/day
+                - Car rental: ₹3,000-5,000/day
+                - Activities: ₹60,000-1,00,000
+                - Visa: ₹15,000
+                - Total: ₹3,00,000-5,50,000
+                
+                TRAVEL FINANCING OPTIONS:
+                
+                TRAVEL LOANS:
+                - HDFC Personal Loan: ₹50K-40L, 10.75%-21% interest, 5-year tenure
+                - SBI Personal Loan: ₹25K-20L, 11.15%-15.65% interest
+                - ICICI Travel Loan: ₹50K-25L, 10.75%-19% interest, Quick approval
+                - Bajaj Finserv: ₹1L-25L, 11%-24% interest, Minimal documentation
+                
+                CREDIT CARD OPTIONS:
+                - HDFC Regalia: 4 reward points/₹150, airport lounge access
+                - SBI Elite: 5% cashback on travel bookings
+                - Axis Magnus: 12 reward points/₹200 on travel, unlimited lounge access
+                - ICICI Emeralde: 4 reward points/₹100, travel insurance coverage
+                
+                FOREX & CURRENCY:
+                - USD: ₹82-84 (current rate), carry $100-200 cash + forex card
+                - EUR: ₹88-92, use forex card for better rates
+                - GBP: ₹100-105, inform bank about travel dates
+                - THB: ₹2.3-2.5, exchange in Thailand for better rates
+                
+                TRAVEL INSURANCE:
+                - Domestic: ₹200-500/day (medical + trip cancellation)
+                - International: ₹1,000-3,000/day (comprehensive coverage)
+                - Adventure sports: Additional ₹500-1,000/day
+                - Annual multi-trip: ₹8,000-15,000 (covers multiple trips)
+                
+                OPTIMAL TRAVEL SAVING STRATEGY:
+                - Start travel SIP 12-18 months before trip
+                - Book flights 2-3 months in advance for domestic, 3-6 months for international
+                - Use travel credit cards for bookings to earn rewards
+                - Consider shoulder season travel for 20-30% savings
+                                 - Group bookings can save 10-15% on accommodation
+                 """;
                 
             case "INVESTMENT" -> """
-                INVESTMENT & WEALTH BUILDING EXPERTISE:
-                - Comprehensive portfolio construction and optimization
-                - Tax-efficient investment strategies and planning
-                - Risk assessment and diversification techniques
-                - Market timing and systematic investment approaches
-                - Alternative investments (REITs, gold, commodities)
-                - International diversification and global exposure
-                - Retirement planning and pension optimization
-                - Estate planning and wealth transfer strategies
-                - Performance monitoring and rebalancing techniques
-                - Behavioral finance and investment psychology
+                INVESTMENT & WEALTH BUILDING WITH SPECIFIC RECOMMENDATIONS:
+                
+                MUTUAL FUND RECOMMENDATIONS WITH CURRENT RETURNS:
+                
+                LARGE CAP FUNDS:
+                - SBI Bluechip Fund: 3-year return 15.2%, Expense ratio 0.62%, Min SIP ₹500
+                - HDFC Top 100 Fund: 3-year return 14.8%, Expense ratio 1.25%, Min SIP ₹1,000
+                - ICICI Prudential Bluechip Fund: 3-year return 14.5%, Expense ratio 1.05%
+                
+                MID CAP FUNDS:
+                - DSP Midcap Fund: 3-year return 18.5%, Expense ratio 1.25%, Higher volatility
+                - HDFC Mid-Cap Opportunities: 3-year return 17.8%, Expense ratio 1.30%
+                - Axis Midcap Fund: 3-year return 16.9%, Expense ratio 1.15%
+                
+                SMALL CAP FUNDS:
+                - Axis Small Cap Fund: 3-year return 22.3%, Expense ratio 1.35%, High risk
+                - DSP Small Cap Fund: 3-year return 21.8%, Expense ratio 1.25%
+                - SBI Small Cap Fund: 3-year return 20.5%, Expense ratio 0.98%
+                
+                SECTOR-SPECIFIC INVESTMENTS:
+                - Technology: ICICI Prudential Technology Fund (3-year: 19.5%)
+                - Banking: SBI Banking & PSU Debt Fund (3-year: 8.2%)
+                - Healthcare: HDFC Healthcare Fund (3-year: 16.8%)
+                - Infrastructure: ICICI Prudential Infrastructure Fund (3-year: 15.2%)
+                
+                DIRECT STOCK RECOMMENDATIONS BY SECTOR:
+                
+                IT STOCKS:
+                - TCS: Current price ₹3,500, Target ₹4,000, Dividend yield 2.8%
+                - Infosys: Current price ₹1,450, Target ₹1,650, Dividend yield 2.5%
+                - HCL Tech: Current price ₹1,200, Target ₹1,400, Dividend yield 3.2%
+                
+                BANKING STOCKS:
+                - HDFC Bank: Current price ₹1,650, Target ₹1,850, Dividend yield 1.2%
+                - ICICI Bank: Current price ₹950, Target ₹1,100, Dividend yield 0.8%
+                - Axis Bank: Current price ₹1,000, Target ₹1,200, Dividend yield 0.6%
+                
+                SIP STRATEGY WITH EXACT AMOUNTS:
+                - ₹5,000/month SIP for 10 years @ 12% return = ₹11.6L corpus
+                - ₹10,000/month SIP for 15 years @ 12% return = ₹37L corpus
+                - ₹15,000/month SIP for 20 years @ 12% return = ₹99L corpus
+                
+                PORTFOLIO ALLOCATION BY AGE:
+                - Age 25-35: 80% Equity, 15% Debt, 5% Gold
+                - Age 35-45: 70% Equity, 25% Debt, 5% Gold
+                - Age 45-55: 60% Equity, 35% Debt, 5% Gold
+                - Age 55+: 40% Equity, 55% Debt, 5% Gold
+                
+                TAX-SAVING INVESTMENTS:
+                - ELSS Funds: ₹1.5L/year, 3-year lock-in, 12-15% expected returns
+                - PPF: ₹1.5L/year, 15-year lock-in, current 7.1% returns
+                - NSC: ₹1.5L/year, 5-year lock-in, 6.8% returns
+                - Tax-saving FDs: ₹1.5L/year, 5-year lock-in, 5.5-6.5% returns
                 """;
                 
             default -> """
-                COMPREHENSIVE FINANCIAL PLANNING:
-                - Holistic financial health assessment and improvement
-                - Goal-based financial planning and prioritization
-                - Cash flow management and budgeting techniques
-                - Risk management through insurance and diversification
-                - Tax planning and optimization strategies
-                - Investment planning across asset classes
-                - Retirement and post-retirement financial security
-                - Estate planning and wealth preservation
-                - Financial discipline and behavioral coaching
-                - Regular review and adjustment strategies
+                COMPREHENSIVE FINANCIAL PLANNING WITH SPECIFIC AMOUNTS & TIMELINES:
+                
+                EMERGENCY FUND CALCULATION:
+                - Target: 6-12 months of expenses
+                - Monthly expenses ₹50K → Emergency fund: ₹3-6L
+                - Keep in liquid funds: SBI Liquid Fund (4-5% returns), HDFC Liquid Fund
+                - Build timeline: 12-18 months with ₹15,000-25,000/month SIP
+                
+                RETIREMENT PLANNING WITH EXACT CORPUS:
+                - Age 30, Retirement 60: Need ₹8-12 crores for comfortable retirement
+                - Monthly SIP required: ₹15,000-25,000 in equity funds (12% assumed return)
+                - PPF contribution: ₹1.5L/year (15-year lock-in, tax-free returns)
+                - NPS contribution: ₹50,000/year (additional tax benefit + employer contribution)
+                
+                INSURANCE COVERAGE:
+                - Life insurance: 10-15x annual income (₹50L income → ₹5-7.5Cr coverage)
+                - Health insurance: ₹10-20L family floater + ₹50L-1Cr super top-up
+                - Term insurance: ₹8,000-15,000/year premium for ₹1Cr coverage (age 30)
+                
+                TAX SAVING INVESTMENTS (Section 80C):
+                - ELSS Mutual Funds: ₹1.5L/year, 3-year lock-in, potential 12-15% returns
+                - PPF: ₹1.5L/year, 15-year lock-in, current 7.1% returns
+                - NSC: ₹1.5L/year, 5-year lock-in, 6.8% returns
+                - ULIP: ₹1.5L/year, 5-year lock-in, market-linked returns
                 """;
         };
     }
