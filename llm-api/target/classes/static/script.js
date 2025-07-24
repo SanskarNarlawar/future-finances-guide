@@ -170,8 +170,21 @@ async function sendSimpleMessage() {
         
     } catch (error) {
         console.error('Error sending simple message:', error);
-        addMessage(elements.simpleMessages, 'assistant', 
-            "I apologize, but I'm having trouble connecting to the server right now. Please check that the backend is running on http://localhost:8080 and try again. 🔧");
+        let errorMessage = 'I\'m having trouble processing your request right now. ';
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage += 'Please check your internet connection and try again.';
+        } else if (error.message.includes('404')) {
+            errorMessage += 'The API endpoint was not found. Please refresh the page and try again.';
+        } else if (error.message.includes('500')) {
+            errorMessage += 'There was a server error. Please try again in a moment.';
+        } else if (error.message.includes('CORS')) {
+            errorMessage += 'There was a connection issue. Please refresh the page and try again.';
+        } else {
+            errorMessage += 'Please try again or refresh the page if the problem persists.';
+        }
+        
+        addMessage(elements.simpleMessages, 'assistant', errorMessage + ' 🔧');
     } finally {
         elements.simpleSendBtn.disabled = false;
         hideLoading();
@@ -228,8 +241,21 @@ async function sendDetailedMessage() {
         
     } catch (error) {
         console.error('Error sending detailed message:', error);
-        addMessage(elements.detailedMessages, 'assistant', 
-            "I apologize, but I'm having trouble connecting to the server right now. Please check that the backend is running on http://localhost:8080 and try again. 🔧");
+        let errorMessage = 'I\'m having trouble processing your request right now. ';
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage += 'Please check your internet connection and try again.';
+        } else if (error.message.includes('404')) {
+            errorMessage += 'The API endpoint was not found. Please refresh the page and try again.';
+        } else if (error.message.includes('500')) {
+            errorMessage += 'There was a server error. Please try again in a moment.';
+        } else if (error.message.includes('CORS')) {
+            errorMessage += 'There was a connection issue. Please refresh the page and try again.';
+        } else {
+            errorMessage += 'Please try again or refresh the page if the problem persists.';
+        }
+        
+        addMessage(elements.detailedMessages, 'assistant', errorMessage + ' 🔧');
     } finally {
         elements.detailedSendBtn.disabled = false;
         hideLoading();

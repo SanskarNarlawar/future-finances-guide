@@ -13,6 +13,8 @@ env_variables:
   H2_CONSOLE_ENABLED: false
   CORS_ALLOWED_ORIGINS: "*"
   JAVA_OPTS: "-Xmx512m -Xms256m"
+  SERVER_SERVLET_CONTEXT_PATH: "/"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
 
 readiness_check:
   path: "/api/v1/llm/health"
