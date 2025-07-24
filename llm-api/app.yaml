@@ -1,0 +1,44 @@
+runtime: java17
+
+service: api
+
+env_variables:
+  SPRING_PROFILES_ACTIVE: production
+  SERVER_PORT: 8080
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 5
+  target_cpu_utilization: 0.6
+
+health_check:
+  enable_health_check: true
+  check_interval_sec: 5
+  timeout_sec: 4
+  unhealthy_threshold: 2
+  healthy_threshold: 2
+
+handlers:
+# Health check endpoint
+- url: /health
+  script: auto
+  secure: always
+
+# API endpoints
+- url: /api/.*
+  script: auto
+  secure: always
+
+# Swagger UI and docs
+- url: /swagger-ui/.*
+  script: auto
+  secure: always
+
+- url: /v3/api-docs.*
+  script: auto
+  secure: always
+
+# Root endpoint
+- url: /.*
+  script: auto
+  secure: always

@@ -21,7 +21,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/financial-advisor/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/health", "/actuator/health").permitAll()
+                .requestMatchers("/", "/favicon.ico").permitAll()
+                .anyRequest().permitAll() // Allow all requests for now (remove in production)
             )
             .headers(headers -> headers.frameOptions().disable()); // For H2 console
 
