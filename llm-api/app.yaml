@@ -43,11 +43,7 @@ network:
   forwarded_ports:
     - 8080
 
-# Resource files to include
-includes:
-  - src/main/resources/static/**
-
-# Files to skip during deployment
+# Files to skip during deployment (keep build artifacts and exclude unnecessary files)
 skip_files:
   - ^(.*/)?#.*#$
   - ^(.*/)?.*~$
@@ -62,3 +58,5 @@ skip_files:
   - ^\.git/.*$
   - ^\.github/.*$
   - ^node_modules/.*$
+  - ^deploy.*\.sh$
+  - ^.*\.md$
