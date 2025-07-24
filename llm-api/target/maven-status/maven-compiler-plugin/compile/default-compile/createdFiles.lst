@@ -47,6 +47,7 @@ com/llmapi/dto/InvestmentGuidance$InvestmentTimeline$InvestmentTimelineBuilder.c
 com/llmapi/dto/InvestmentGuidance$MutualFundRecommendation$MutualFundRecommendationBuilder.class
 com/llmapi/dto/InvestmentGuidance$InvestmentStrategy$InvestmentStrategyBuilder.class
 com/llmapi/service/InvestmentGuidanceService.class
+com/llmapi/controller/CorsController.class
 com/llmapi/dto/InvestmentGuidance$RiskManagement.class
 com/llmapi/model/ChatMessage.class
 com/llmapi/service/impl/FinancialAdvisoryServiceImpl$1.class

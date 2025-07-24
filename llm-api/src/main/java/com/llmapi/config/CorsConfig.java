@@ -36,15 +36,18 @@ public class CorsConfig implements WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Allow all origins for development and production
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "*",
+            "http://localhost:*",
+            "https://*.appspot.com",
+            "https://*.googleapis.com"
+        ));
         
-        // Allow specific origins if needed
+        // Also allow specific origins
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
             "http://localhost:8080",
-            "http://localhost:8081",
-            "https://*.appspot.com",
-            "https://*.googleapis.com"
+            "http://localhost:8081"
         ));
         
         configuration.setAllowedMethods(Arrays.asList(
