@@ -1,100 +1,51 @@
-# .gcloudignore file for Financial Advisor LLM API
-# This file specifies files that are ignored by gcloud when deploying
-# your application. If you remove this file, gcloud will use a default
-# .gcloudignore file.
+# .gcloudignore - File exclusions for Java 17 App Engine deployment
 
-# Compiled Java classes and build artifacts (keep target/ for JAR)
-*.class
-*.log
-*.ctxt
-.mtj.tmp/
-*.jar.original
-
-# Package Files
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# Virtual machine crash logs
-hs_err_pid*
-
-# IDE files
-.idea/
-*.iws
-*.iml
-*.ipr
-.vscode/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Git files
+# Git and version control
 .git/
 .gitignore
 .github/
 
-# Maven specific
-.mvn/
-mvnw
-mvnw.cmd
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# Build artifacts to exclude (keep JAR)
+target/classes/
+target/test-classes/
+target/maven-status/
+target/maven-archiver/
+target/generated-sources/
+target/generated-test-sources/
+target/surefire-reports/
+*.jar.original
+
+# Source test files
+src/test/
+
+# Documentation
+*.md
+docs/
 
 # Docker files
-Dockerfile*
-docker-compose*.yml
+Dockerfile
+docker-compose.yml
 .dockerignore
 
-# Documentation files (optional - uncomment if you want to exclude)
-# *.md
-# docs/
+# Scripts
+*.sh
 
-# Deployment scripts
-deploy*.sh
-
-# Test files
-src/test/
-target/test-classes/
-target/surefire-reports/
-
-# Temporary files
-*.tmp
-*.temp
-.tmp/
-.temp/
-
-# Logs
-logs/
+# Logs and temp files
 *.log
+*.tmp
+logs/
 
 # Node modules (if any)
 node_modules/
-
-# Python files (if any)
-*.py[cod]
-__pycache__/
-*.so
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# Application specific exclusions
-application.log
-*.pid
-
-# Keep these important files for deployment:
-# !target/llm-api-1.0.0.jar
-# !app.yaml
-# !src/main/resources/
