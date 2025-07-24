@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: llm-api
+  
+  datasource:
+    url: jdbc:h2:mem:llmdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# LLM Configuration
+llm:
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+  
+# Financial Advisory Configuration
+financial-advisory:
+  default-advisory-mode: GENERAL
+  include-disclaimers: true
+  max-profile-cache-hours: 24
+  age-groups:
+    young-adult:
+      min-age: 18
+      max-age: 29
+      focus: "Building foundation and emergency fund"
+    early-career:
+      min-age: 30
+      max-age: 39
+      focus: "Accelerating savings and family planning"
+    mid-career:
+      min-age: 40
+      max-age: 49
+      focus: "Peak earning and education funding"
+    pre-retirement:
+      min-age: 50
+      max-age: 59
+      focus: "Retirement preparation and catch-up contributions"
+    retirement:
+      min-age: 60
+      max-age: 100
+      focus: "Retirement transition and legacy planning"
+
+# Logging
+logging:
+  level:
+    com.llmapi: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
