@@ -1,5 +1,6 @@
 /workspace/llm-api/src/main/java/com/llmapi/controller/FinancialAdvisoryController.java
 /workspace/llm-api/src/main/java/com/llmapi/LlmApiApplication.java
+/workspace/llm-api/src/main/java/com/llmapi/config/CorsConfig.java
 /workspace/llm-api/src/main/java/com/llmapi/dto/InvestmentGuidance.java
 /workspace/llm-api/src/main/java/com/llmapi/dto/FinancialProfile.java
 /workspace/llm-api/src/main/java/com/llmapi/service/impl/InvestmentGuidanceServiceImpl.java

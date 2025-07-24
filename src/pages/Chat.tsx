@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Send, Bot, User, TrendingUp, AlertCircle, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Send, Bot, User, TrendingUp, AlertCircle, Mic, MicOff, Volume2, VolumeX, Wifi, WifiOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { UserMenu } from "@/components/UserMenu";
 import { useToast } from "@/hooks/use-toast";
 import { useVoice } from "@/hooks/useVoice";
 import { useLanguageContext } from "@/contexts/LanguageContext";
+import { llmService } from "@/services/llmService";
 
 interface Message {
   id: string;
@@ -32,8 +33,10 @@ const Chat = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [showApiKeyInput, setShowApiKeyInput] = useState(true);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false); // Default to false, use backend
   const [currentSpeakingMessage, setCurrentSpeakingMessage] = useState<string | null>(null);
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean | null>(null);
+  const [sessionId] = useState(() => `session-${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { conversationLanguage, setConversationLanguage, detectLanguage } = useLanguageContext();
@@ -57,6 +60,36 @@ const Chat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Test backend connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const connected = await llmService.testConnection();
+        setIsBackendConnected(connected);
+        
+        if (!connected) {
+          toast({
+            title: "Backend Connection Failed",
+            description: "Cannot connect to the backend API. Falling back to demo mode.",
+            variant: "destructive"
+          });
+          setShowApiKeyInput(true);
+        } else {
+          toast({
+            title: "Backend Connected",
+            description: "Successfully connected to the AI backend service.",
+          });
+        }
+      } catch (error) {
+        console.error('Connection test failed:', error);
+        setIsBackendConnected(false);
+        setShowApiKeyInput(true);
+      }
+    };
+
+    testConnection();
+  }, [toast]);
 
   const financialPrompts = [
     "How should I diversify my portfolio?",
@@ -99,6 +132,24 @@ const Chat = () => {
   };
 
   const generateAIResponse = async (userMessage: string, messageLanguage: string): Promise<string> => {
+    // If backend is connected, use real API
+    if (isBackendConnected) {
+      try {
+        const response = await llmService.askQuestion(userMessage);
+        return response.message;
+      } catch (error) {
+        console.error('Backend API failed, falling back to demo responses:', error);
+        toast({
+          title: "API Error",
+          description: "Backend API failed. Using demo responses.",
+          variant: "destructive"
+        });
+        setIsBackendConnected(false);
+        // Fall through to demo responses
+      }
+    }
+
+    // Fallback to demo responses
     const responses = getLocalizedResponses(messageLanguage);
     
     const lowerMessage = userMessage.toLowerCase();
@@ -114,10 +165,10 @@ const Chat = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
-    if (showApiKeyInput && !apiKey.trim()) {
+    if (showApiKeyInput && !apiKey.trim() && !isBackendConnected) {
       toast({
-        title: "API Key Required",
-        description: "Please enter your OpenAI API key to use the AI advisor, or use the demo mode.",
+        title: "Configuration Required",
+        description: "Please enter your OpenAI API key or ensure the backend is running.",
         variant: "destructive"
       });
       return;
@@ -223,7 +274,27 @@ const Chat = () => {
 
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold mb-2">AI Financial Advisor</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-4xl font-bold">AI Financial Advisor</h1>
+            <div className="flex items-center space-x-2">
+              {isBackendConnected === null ? (
+                <div className="flex items-center text-muted-foreground">
+                  <div className="animate-spin w-4 h-4 border-2 border-primary rounded-full border-t-transparent mr-2"></div>
+                  <span className="text-sm">Checking connection...</span>
+                </div>
+              ) : isBackendConnected ? (
+                <div className="flex items-center text-green-600">
+                  <Wifi className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Backend Connected</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-red-600">
+                  <WifiOff className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Demo Mode</span>
+                </div>
+              )}
+            </div>
+          </div>
           <p className="text-muted-foreground text-lg">
             Get personalized financial advice powered by artificial intelligence
           </p>
@@ -234,19 +305,21 @@ const Chat = () => {
           )}
         </div>
 
-        {/* API Key Input */}
-        {showApiKeyInput && (
+        {/* API Key Input - only show if backend is not connected */}
+        {(showApiKeyInput || isBackendConnected === false) && (
           <Card className="mb-6 shadow-card border-warning">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <AlertCircle className="mr-2 h-5 w-5 text-warning" />
-                API Configuration
+                {isBackendConnected === false ? "Backend Offline" : "API Configuration"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                To use the AI advisor with real responses, enter your OpenAI API key. 
-                Or try our demo mode with simulated responses.
+                {isBackendConnected === false 
+                  ? "The backend AI service is not available. You can enter your OpenAI API key for direct AI access, or continue with demo responses."
+                  : "To use the AI advisor with real responses, enter your OpenAI API key. Or try our demo mode with simulated responses."
+                }
               </p>
               <div className="flex space-x-2">
                 <Input
@@ -263,6 +336,14 @@ const Chat = () => {
                   Demo Mode
                 </Button>
               </div>
+              {isBackendConnected === false && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>For developers:</strong> Make sure the backend is running on port 8080. 
+                    You can start it with: <code className="bg-background px-1 rounded">mvn spring-boot:run</code>
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

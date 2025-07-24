@@ -6,6 +6,7 @@ com/llmapi/dto/ChatRequest.class
 com/llmapi/service/impl/LlmServiceImpl.class
 com/llmapi/repository/ChatMessageRepository.class
 com/llmapi/dto/InvestmentGuidance$InvestmentBreakdown$InvestmentBreakdownBuilder.class
+com/llmapi/config/CorsConfig.class
 com/llmapi/model/ChatMessage$Role.class
 com/llmapi/dto/FinancialProfile$InvestmentExperience.class
 com/llmapi/dto/InvestmentGuidance$AssetAllocation$AssetAllocationBuilder.class
