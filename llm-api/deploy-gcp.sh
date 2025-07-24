@@ -61,6 +61,29 @@ if [ ! -f "app.yaml" ]; then
     print_error "app.yaml not found. Please ensure the App Engine configuration file exists."
     exit 1
 fi
+
+if [ ! -f ".gcloudignore" ]; then
+    print_warning ".gcloudignore not found. This file is required for Java 17 runtime."
+    print_status "Creating .gcloudignore file..."
+    cat > .gcloudignore << 'EOF'
+# .gcloudignore for Java 17 App Engine
+*.class
+*.log
+.git/
+.github/
+Dockerfile*
+docker-compose*.yml
+deploy*.sh
+src/test/
+target/test-classes/
+*.md
+.idea/
+.vscode/
+*~
+.DS_Store
+EOF
+    print_success ".gcloudignore file created"
+fi
 print_success "Project directory check passed"
 
 echo ""
