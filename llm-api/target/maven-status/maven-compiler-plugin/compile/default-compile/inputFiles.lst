@@ -4,6 +4,7 @@
 /workspace/llm-api/src/main/java/com/llmapi/controller/CorsController.java
 /workspace/llm-api/src/main/java/com/llmapi/dto/InvestmentGuidance.java
 /workspace/llm-api/src/main/java/com/llmapi/dto/FinancialProfile.java
+/workspace/llm-api/src/main/java/com/llmapi/controller/TestController.java
 /workspace/llm-api/src/main/java/com/llmapi/service/impl/InvestmentGuidanceServiceImpl.java
 /workspace/llm-api/src/main/java/com/llmapi/service/FinancialAdvisoryService.java
 /workspace/llm-api/src/main/java/com/llmapi/model/ChatMessage.java

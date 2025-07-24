@@ -24,6 +24,7 @@ com/llmapi/dto/InvestmentGuidance$TimelineGoal$TimelineGoalBuilder.class
 com/llmapi/dto/InvestmentGuidance$TaxOptimization.class
 com/llmapi/dto/FinancialProfile$IncomeRange.class
 com/llmapi/dto/InvestmentGuidance$AlternativeInvestment$AlternativeInvestmentBuilder.class
+com/llmapi/controller/TestController.class
 com/llmapi/dto/InvestmentGuidance$PerformanceTracking$PerformanceTrackingBuilder.class
 com/llmapi/dto/InvestmentGuidance$AlternativeInvestment.class
 com/llmapi/dto/InvestmentGuidance$TimelineGoal.class
