@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Send, Bot, User, TrendingUp, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { UserMenu } from "@/components/UserMenu";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -145,7 +146,7 @@ const Chat = () => {
             <TrendingUp className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">FinanceAI</span>
           </Link>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
             <Link to="/dashboard">
               <Button variant="outline">Dashboard</Button>
             </Link>
@@ -155,6 +156,7 @@ const Chat = () => {
             <Link to="/learning">
               <Button variant="outline">Learning</Button>
             </Link>
+            <UserMenu />
           </div>
         </div>
       </nav>

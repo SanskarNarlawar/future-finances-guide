@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TrendingUp, DollarSign, PieChart, MessageSquare, Shield, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserMenu } from "@/components/UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslations } from "@/hooks/useTranslations";
 
 const Index = () => {
+  const { isAuthenticated } = useAuth();
   const { currentLanguage, setCurrentLanguage, t } = useTranslations();
   
   const features = [
@@ -45,9 +48,12 @@ const Index = () => {
               currentLanguage={currentLanguage}
               onLanguageChange={setCurrentLanguage}
             />
-            <Link to="/dashboard">
-              <Button variant="outline">{t('dashboard')}</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link to="/dashboard">
+                <Button variant="outline">{t('dashboard')}</Button>
+              </Link>
+            ) : null}
+            <UserMenu />
             <Link to="/stocks">
               <Button variant="outline">Stocks</Button>
             </Link>

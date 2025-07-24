@@ -5,7 +5,7 @@ export interface User {
   age: number;
   country: string;
   language: string;
-  financialGoal: FinancialGoal;
+  financialGoals: FinancialGoal[];
   createdAt: Date;
   lastLogin: Date;
 }
@@ -14,7 +14,7 @@ export interface UserProfile {
   age: number;
   country: string;
   language: string;
-  financialGoal: FinancialGoal;
+  financialGoals: FinancialGoal[];
 }
 
 export type FinancialGoal = 
@@ -47,7 +47,7 @@ export interface SignupData {
   age: number;
   country: string;
   language: string;
-  financialGoal: FinancialGoal;
+  financialGoals: FinancialGoal[];
 }
 
 export const FINANCIAL_GOALS: { value: FinancialGoal; label: string; description: string }[] = [

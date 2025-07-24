@@ -163,7 +163,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         age: data.age,
         country: data.country,
         language: data.language,
-        financialGoal: data.financialGoal,
+        financialGoals: data.financialGoals,
         createdAt: new Date(),
         lastLogin: new Date(),
       };
