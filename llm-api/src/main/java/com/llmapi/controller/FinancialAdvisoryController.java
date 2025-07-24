@@ -27,661 +27,27 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/financial-advisor")
 @RequiredArgsConstructor
-@Tag(name = "💰 Financial Advisory API", description = "Personalized financial advisory chatbot endpoints based on age and interests")
+@Tag(name = "💰 Complete Financial Advisory API", description = "Comprehensive financial advisory system with personalized investment guidance, budgeting, retirement planning, and chatbot assistance")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class FinancialAdvisoryController {
 
     private final FinancialAdvisoryService financialAdvisoryService;
     private final InvestmentGuidanceService investmentGuidanceService;
 
-    @PostMapping("/chat")
+    @PostMapping("/comprehensive-guidance")
     @Operation(
-        summary = "Get personalized financial advice",
-        description = "Send a message with financial profile to get personalized advice based on age, interests, and risk tolerance",
+        summary = "🎯 Get Complete Financial & Investment Guidance",
+        description = "**ALL-IN-ONE ENDPOINT** - Get comprehensive financial advisory including personalized investment recommendations (stocks, SIPs, mutual funds, ETFs), budgeting advice, retirement planning, risk management, tax optimization, and monthly investment plan based on age, interests, and risk tolerance.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Chat request with financial profile for personalized advice",
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ChatRequest.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Young Tech Professional",
-                        summary = "28-year-old tech worker seeking investment advice",
-                        value = """
-                        {
-                          "message": "I'm 28 and work in tech. I want to start investing but don't know where to begin. What should I focus on?",
-                          "session_id": "young-professional-session",
-                          "advisory_mode": "INVESTMENT_FOCUSED",
-                          "financial_profile": {
-                            "age": 28,
-                            "income_range": "RANGE_75K_100K",
-                            "risk_tolerance": "MODERATE",
-                            "investment_experience": "BEGINNER",
-                            "interests": ["technology", "artificial intelligence", "startups"],
-                            "financial_goals": ["RETIREMENT", "HOME_PURCHASE", "EMERGENCY_FUND"],
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "SINGLE",
-                            "current_savings": 25000,
-                            "monthly_expenses": 4000
-                          }
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Mid-Career Parent",
-                        summary = "38-year-old parent planning for children's education",
-                        value = """
-                        {
-                          "message": "I have two kids and want to start saving for their college education. What are my best options?",
-                          "session_id": "parent-session",
-                          "advisory_mode": "GENERAL",
-                          "financial_profile": {
-                            "age": 38,
-                            "income_range": "RANGE_100K_150K",
-                            "risk_tolerance": "MODERATE",
-                            "investment_experience": "INTERMEDIATE",
-                            "interests": ["education", "family planning", "healthcare"],
-                            "financial_goals": ["CHILD_EDUCATION", "RETIREMENT", "INSURANCE"],
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "MARRIED",
-                            "number_of_dependents": 2,
-                            "current_savings": 120000,
-                            "monthly_expenses": 8000
-                          }
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Pre-Retiree",
-                        summary = "57-year-old planning for retirement",
-                        value = """
-                        {
-                          "message": "I'm 8 years from retirement but still have a mortgage. Should I pay it off early or keep investing?",
-                          "session_id": "pre-retiree-session",
-                          "advisory_mode": "RETIREMENT_PLANNING",
-                          "financial_profile": {
-                            "age": 57,
-                            "income_range": "ABOVE_150K",
-                            "risk_tolerance": "CONSERVATIVE",
-                            "investment_experience": "ADVANCED",
-                            "interests": ["real estate", "conservative investments", "travel"],
-                            "financial_goals": ["RETIREMENT", "DEBT_PAYOFF"],
-                            "employment_status": "EMPLOYED_FULL_TIME",
-                            "marital_status": "MARRIED",
-                            "debt_amount": 180000,
-                            "current_savings": 650000,
-                            "retirement_age_target": 65
-                          }
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Personalized financial advice generated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ChatResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "id": "financial-advice-123",
-                      "session_id": "young-professional-session",
-                      "message": "Great question! At 28 with your tech background and moderate risk tolerance, here's my personalized advice:\\n\\n**Investment Strategy for Your Age:**\\n- Focus on growth investments (70-80% stocks, 20-30% bonds)\\n- Start with low-cost index funds like S&P 500\\n- Consider tech sector ETFs given your interests\\n\\n**Given Your Interests:**\\n- Technology sector ETFs (QQQ, XLK)\\n- AI and innovation-focused funds\\n- Consider ESG funds for sustainable tech\\n\\n**Action Steps:**\\n1. Build emergency fund (3-6 months expenses)\\n2. Maximize employer 401(k) match\\n3. Open Roth IRA for tax-free growth\\n4. Start with $500/month in diversified index funds\\n\\n⚠️ **Important Disclaimer**: This advice is for educational purposes only. Please consult with a qualified financial advisor for decisions specific to your situation.",
-                      "model_name": "gpt-3.5-turbo",
-                      "created_at": "2024-01-15T10:30:00",
-                      "token_count": 180
-                    }
-                    """
-                )
-            )
-        )
-    })
-    public ResponseEntity<ChatResponse> getFinancialAdvice(
-            @Valid @RequestBody ChatRequest request) {
-        
-        log.info("Received financial advisory request for session: {}", request.getSessionId());
-        
-        try {
-            ChatResponse response = financialAdvisoryService.generateFinancialAdvice(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error generating financial advice: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(ChatResponse.builder()
-                    .message("I apologize, but I'm having trouble processing your request right now. Please try again later.")
-                    .sessionId(request.getSessionId())
-                    .build());
-        }
-    }
-
-    @PostMapping("/investment-recommendations")
-    @Operation(
-        summary = "Get investment recommendations",
-        description = "Get personalized investment recommendations based on age, risk tolerance, and personal interests",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for investment recommendations",
+            description = "Complete financial profile for comprehensive guidance",
             required = true,
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = FinancialProfile.class),
                 examples = {
                     @ExampleObject(
-                        name = "Young Tech Professional",
-                        summary = "28-year-old with tech interests",
-                        value = """
-                        {
-                          "age": 28,
-                          "income_range": "RANGE_75K_100K",
-                          "risk_tolerance": "MODERATE",
-                          "investment_experience": "BEGINNER",
-                          "interests": ["technology", "artificial intelligence", "renewable energy"],
-                          "financial_goals": ["RETIREMENT", "HOME_PURCHASE", "EMERGENCY_FUND"],
-                          "employment_status": "EMPLOYED_FULL_TIME",
-                          "marital_status": "SINGLE"
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Healthcare Professional",
-                        summary = "42-year-old healthcare worker",
-                        value = """
-                        {
-                          "age": 42,
-                          "income_range": "RANGE_100K_150K",
-                          "risk_tolerance": "CONSERVATIVE",
-                          "investment_experience": "INTERMEDIATE",
-                          "interests": ["healthcare", "education", "family"],
-                          "financial_goals": ["RETIREMENT", "CHILD_EDUCATION", "INSURANCE"],
-                          "employment_status": "EMPLOYED_FULL_TIME",
-                          "marital_status": "MARRIED",
-                          "number_of_dependents": 2,
-                          "current_savings": 150000,
-                          "monthly_expenses": 8000
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Investment recommendations generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "recommendations": "Based on your age (28), here's a suggested asset allocation:\\n- Stocks/Equity: 72%\\n- Bonds/Fixed Income: 28%\\n\\nWith moderate risk tolerance, consider:\\n- Diversified index funds (S&P 500, Total Stock Market)\\n- Mix of growth and value stocks\\n- International diversification\\n\\nBased on your interests (technology, artificial intelligence, renewable energy), you might consider:\\n- Technology sector ETFs (QQQ, XLK)\\n- ESG (Environmental, Social, Governance) funds\\n- Diversified funds aligned with your interests",
-                  "profile_complete": true,
-                  "age": 28
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getInvestmentRecommendations(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating investment recommendations for age: {}", profile.getAge());
-        
-        try {
-            String recommendations = financialAdvisoryService.generateInvestmentRecommendations(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "recommendations", recommendations,
-                "profile_complete", financialAdvisoryService.isProfileComplete(profile),
-                "age", profile.getAge() != null ? profile.getAge() : "Not provided"
-            ));
-        } catch (Exception e) {
-            log.error("Error generating investment recommendations: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate recommendations at this time"));
-        }
-    }
-
-    @GetMapping("/age-based-goals/{age}")
-    @Operation(
-        summary = "Get age-appropriate financial goals",
-        description = "Get financial milestones and goals appropriate for the specified age group",
-        parameters = @Parameter(
-            name = "age",
-            description = "User's age (18-100)",
-            required = true,
-            example = "28"
-        )
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Age-based goals generated successfully",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Age 28 Goals",
-                        summary = "Financial goals for 28-year-old",
-                        value = """
-                        {
-                          "age": 28,
-                          "goals": "Financial milestones for your age (28):\\n\\nIn Your 20s - Foundation Building:\\n- Build emergency fund (3-6 months expenses)\\n- Start investing early (even small amounts)\\n- Maximize employer 401(k) match\\n- Pay off high-interest debt\\n- Build good credit history",
-                          "session_id": "N/A"
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Age 45 Goals",
-                        summary = "Financial goals for 45-year-old",
-                        value = """
-                        {
-                          "age": 45,
-                          "goals": "Financial milestones for your age (45):\\n\\nIn Your 40s - Peak Earning Years:\\n- Target 3x annual salary in retirement savings by 40\\n- Maximize retirement account contributions\\n- Focus on children's education funding\\n- Consider long-term care insurance\\n- Review estate planning documents",
-                          "session_id": "N/A"
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    })
-    public ResponseEntity<Map<String, Object>> getAgeBasedGoals(
-            @Parameter(description = "User's age") @PathVariable Integer age,
-            @RequestParam(required = false) String sessionId) {
-        
-        log.info("Generating age-based goals for age: {}", age);
-        
-        try {
-            // Create a minimal profile with just age for goals generation
-            FinancialProfile profile = FinancialProfile.builder().age(age).build();
-            String goals = financialAdvisoryService.generateAgeBasedGoals(age, profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "age", age,
-                "goals", goals,
-                "session_id", sessionId != null ? sessionId : "N/A"
-            ));
-        } catch (Exception e) {
-            log.error("Error generating age-based goals: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate goals at this time"));
-        }
-    }
-
-    @PostMapping("/budgeting-advice")
-    @Operation(
-        summary = "Get personalized budgeting advice",
-        description = "Get budgeting strategies and expense management advice based on age and financial situation",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for budgeting advice",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    name = "Young Adult Profile",
-                    value = """
-                    {
-                      "age": 24,
-                      "income_range": "RANGE_50K_75K",
-                      "employment_status": "EMPLOYED_FULL_TIME",
-                      "marital_status": "SINGLE",
-                      "current_savings": 5000,
-                      "monthly_expenses": 3500
-                    }
-                    """
-                )
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Budgeting advice generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "advice": "Young Adult Budgeting (20s):\\n- Follow 50/30/20 rule: 50% needs, 30% wants, 20% savings\\n- Prioritize building emergency fund first\\n- Keep housing costs under 30% of income\\n\\nGeneral Budgeting Tips:\\n- Track expenses for at least one month\\n- Use the envelope method for discretionary spending\\n- Automate savings and bill payments\\n- Review and adjust budget quarterly",
-                  "age_group": "Young Adult (20s)",
-                  "profile_complete": false
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getBudgetingAdvice(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating budgeting advice for age: {}", profile.getAge());
-        
-        try {
-            String advice = financialAdvisoryService.generateBudgetingAdvice(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "advice", advice,
-                "age_group", getAgeGroup(profile.getAge()),
-                "profile_complete", financialAdvisoryService.isProfileComplete(profile)
-            ));
-        } catch (Exception e) {
-            log.error("Error generating budgeting advice: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate budgeting advice at this time"));
-        }
-    }
-
-    @PostMapping("/retirement-plan")
-    @Operation(
-        summary = "Get retirement planning advice",
-        description = "Get personalized retirement planning strategy based on age, savings, and retirement goals",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for retirement planning",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Early Career",
-                        summary = "32-year-old starting retirement planning",
-                        value = """
-                        {
-                          "age": 32,
-                          "income_range": "RANGE_75K_100K",
-                          "retirement_age_target": 65,
-                          "current_savings": 50000,
-                          "employment_status": "EMPLOYED_FULL_TIME",
-                          "financial_goals": ["RETIREMENT"]
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Late Career",
-                        summary = "55-year-old approaching retirement",
-                        value = """
-                        {
-                          "age": 55,
-                          "income_range": "ABOVE_150K",
-                          "retirement_age_target": 62,
-                          "current_savings": 750000,
-                          "employment_status": "EMPLOYED_FULL_TIME",
-                          "financial_goals": ["RETIREMENT"],
-                          "risk_tolerance": "CONSERVATIVE"
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Retirement plan generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "retirement_plan": "Personalized Retirement Planning:\\n\\nCurrent Age: 32\\nTarget Retirement Age: 65\\nYears to Retirement: 33\\n\\nMedium-Term Strategy (15-30 years):\\n- Balance growth with some stability\\n- Increase contribution rates annually\\n- Diversify across asset classes",
-                  "current_age": 32,
-                  "target_retirement_age": 65,
-                  "years_to_retirement": 33
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getRetirementPlan(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating retirement plan for age: {}", profile.getAge());
-        
-        try {
-            String plan = financialAdvisoryService.generateRetirementPlan(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "retirement_plan", plan,
-                "current_age", profile.getAge(),
-                "target_retirement_age", profile.getRetirementAgeTarget() != null ? profile.getRetirementAgeTarget() : 65,
-                "years_to_retirement", calculateYearsToRetirement(profile)
-            ));
-        } catch (Exception e) {
-            log.error("Error generating retirement plan: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate retirement plan at this time"));
-        }
-    }
-
-    @PostMapping("/profile/validate")
-    @Operation(
-        summary = "Validate financial profile completeness",
-        description = "Check if the financial profile has sufficient information for personalized advice",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile to validate",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Complete Profile",
-                        summary = "Profile with all required fields",
-                        value = """
-                        {
-                          "age": 35,
-                          "income_range": "RANGE_75K_100K",
-                          "risk_tolerance": "MODERATE",
-                          "investment_experience": "INTERMEDIATE"
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Incomplete Profile",
-                        summary = "Profile missing required fields",
-                        value = """
-                        {
-                          "age": 30,
-                          "interests": ["technology"]
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Profile validation completed",
-        content = @Content(
-            mediaType = "application/json",
-            examples = {
-                @ExampleObject(
-                    name = "Complete Profile Response",
-                    value = """
-                    {
-                      "is_complete": true,
-                      "age_provided": true,
-                      "risk_tolerance_provided": true,
-                      "investment_experience_provided": true,
-                      "income_range_provided": true,
-                      "recommendations": "Profile is complete for personalized advice"
-                    }
-                    """
-                ),
-                @ExampleObject(
-                    name = "Incomplete Profile Response",
-                    value = """
-                    {
-                      "is_complete": false,
-                      "age_provided": true,
-                      "risk_tolerance_provided": false,
-                      "investment_experience_provided": false,
-                      "income_range_provided": false,
-                      "recommendations": "Please provide age, risk tolerance, investment experience, and income range for better recommendations"
-                    }
-                    """
-                )
-            }
-        )
-    )
-    public ResponseEntity<Map<String, Object>> validateProfile(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Validating financial profile completeness");
-        
-        boolean isComplete = financialAdvisoryService.isProfileComplete(profile);
-        
-        return ResponseEntity.ok(Map.of(
-            "is_complete", isComplete,
-            "age_provided", profile.getAge() != null,
-            "risk_tolerance_provided", profile.getRiskTolerance() != null,
-            "investment_experience_provided", profile.getInvestmentExperience() != null,
-            "income_range_provided", profile.getIncomeRange() != null,
-            "recommendations", isComplete ? 
-                "Profile is complete for personalized advice" : 
-                "Please provide age, risk tolerance, investment experience, and income range for better recommendations"
-        ));
-    }
-
-    @GetMapping("/advisory-modes")
-    @Operation(
-        summary = "Get available advisory modes",
-        description = "List all available advisory modes and their descriptions for personalized financial advice"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "List of advisory modes",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "advisory_modes": {
-                    "GENERAL": "General financial advice",
-                    "INVESTMENT_FOCUSED": "Investment-focused advice",
-                    "BUDGETING": "Budgeting and expense management",
-                    "RETIREMENT_PLANNING": "Retirement planning",
-                    "DEBT_MANAGEMENT": "Debt management",
-                    "TAX_PLANNING": "Tax planning",
-                    "INSURANCE_PLANNING": "Insurance planning",
-                    "EMERGENCY_FUND": "Emergency fund planning"
-                  },
-                  "default_mode": "GENERAL"
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getAdvisoryModes() {
-        
-        return ResponseEntity.ok(Map.of(
-            "advisory_modes", Map.of(
-                "GENERAL", "General financial advice",
-                "INVESTMENT_FOCUSED", "Investment-focused advice",
-                "BUDGETING", "Budgeting and expense management",
-                "RETIREMENT_PLANNING", "Retirement planning",
-                "DEBT_MANAGEMENT", "Debt management",
-                "TAX_PLANNING", "Tax planning",
-                "INSURANCE_PLANNING", "Insurance planning",
-                "EMERGENCY_FUND", "Emergency fund planning"
-            ),
-            "default_mode", "GENERAL"
-        ));
-    }
-
-    @GetMapping("/profile/template")
-    @Operation(
-        summary = "Get financial profile template",
-        description = "Get a template showing all available profile fields, their types, and example values"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Profile template with field descriptions",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "required_fields": {
-                    "age": "Integer (18-100)",
-                    "risk_tolerance": "CONSERVATIVE, MODERATE, AGGRESSIVE",
-                    "investment_experience": "BEGINNER, INTERMEDIATE, ADVANCED",
-                    "income_range": "BELOW_25K, RANGE_25K_50K, RANGE_50K_75K, RANGE_75K_100K, RANGE_100K_150K, ABOVE_150K"
-                  },
-                  "optional_fields": {
-                    "financial_goals": "Array of: RETIREMENT, EMERGENCY_FUND, HOME_PURCHASE, EDUCATION, etc.",
-                    "interests": "Array of strings (e.g., ['technology', 'healthcare', 'environment'])",
-                    "current_savings": "BigDecimal",
-                    "monthly_expenses": "BigDecimal",
-                    "debt_amount": "BigDecimal",
-                    "employment_status": "EMPLOYED_FULL_TIME, EMPLOYED_PART_TIME, SELF_EMPLOYED, etc.",
-                    "marital_status": "SINGLE, MARRIED, DIVORCED, WIDOWED",
-                    "number_of_dependents": "Integer",
-                    "retirement_age_target": "Integer",
-                    "preferred_investment_types": "Array of investment types"
-                  },
-                  "example_interests": [
-                    "technology",
-                    "healthcare",
-                    "environment",
-                    "real estate",
-                    "travel",
-                    "education",
-                    "renewable energy",
-                    "artificial intelligence"
-                  ]
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getProfileTemplate() {
-        
-        Map<String, Object> requiredFields = Map.of(
-            "age", "Integer (18-100)",
-            "risk_tolerance", "CONSERVATIVE, MODERATE, AGGRESSIVE",
-            "investment_experience", "BEGINNER, INTERMEDIATE, ADVANCED",
-            "income_range", "BELOW_25K, RANGE_25K_50K, RANGE_50K_75K, RANGE_75K_100K, RANGE_100K_150K, ABOVE_150K"
-        );
-        
-        Map<String, Object> optionalFields = Map.of(
-            "financial_goals", "Array of: RETIREMENT, EMERGENCY_FUND, HOME_PURCHASE, EDUCATION, etc.",
-            "interests", "Array of strings (e.g., ['technology', 'healthcare', 'environment'])",
-            "current_savings", "BigDecimal",
-            "monthly_expenses", "BigDecimal",
-            "debt_amount", "BigDecimal",
-            "employment_status", "EMPLOYED_FULL_TIME, EMPLOYED_PART_TIME, SELF_EMPLOYED, etc.",
-            "marital_status", "SINGLE, MARRIED, DIVORCED, WIDOWED",
-            "number_of_dependents", "Integer",
-            "retirement_age_target", "Integer",
-            "preferred_investment_types", "Array of investment types"
-        );
-        
-        Map<String, Object> response = Map.of(
-            "required_fields", requiredFields,
-            "optional_fields", optionalFields,
-            "example_interests", List.of(
-                "technology", "healthcare", "environment", "real estate", 
-                "travel", "education", "renewable energy", "artificial intelligence"
-            )
-        );
-        
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/investment-guidance/comprehensive")
-    @Operation(
-        summary = "Get comprehensive personalized investment guidance",
-        description = "Get detailed investment recommendations including stocks, SIPs, mutual funds, ETFs, bonds, asset allocation, and monthly investment plan based on your financial profile",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for comprehensive investment guidance",
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FinancialProfile.class),
-                examples = {
-                    @ExampleObject(
-                        name = "Young Tech Professional",
-                        summary = "28-year-old tech worker with moderate risk tolerance",
+                        name = "🚀 Young Tech Professional (28)",
+                        summary = "Complete guidance for 28-year-old tech worker",
                         value = """
                         {
                           "age": 28,
@@ -698,8 +64,8 @@ public class FinancialAdvisoryController {
                         """
                     ),
                     @ExampleObject(
-                        name = "Mid-Career Healthcare Professional",
-                        summary = "38-year-old healthcare worker with family",
+                        name = "🏥 Mid-Career Healthcare Professional (38)",
+                        summary = "Complete guidance for 38-year-old healthcare worker with family",
                         value = """
                         {
                           "age": 38,
@@ -712,13 +78,14 @@ public class FinancialAdvisoryController {
                           "marital_status": "MARRIED",
                           "number_of_dependents": 2,
                           "current_savings": 500000,
-                          "monthly_expenses": 80000
+                          "monthly_expenses": 80000,
+                          "retirement_age_target": 60
                         }
                         """
                     ),
                     @ExampleObject(
-                        name = "Conservative Pre-Retiree",
-                        summary = "55-year-old planning for retirement",
+                        name = "🏦 Conservative Pre-Retiree (55)",
+                        summary = "Complete guidance for 55-year-old planning retirement",
                         value = """
                         {
                           "age": 55,
@@ -731,7 +98,26 @@ public class FinancialAdvisoryController {
                           "marital_status": "MARRIED",
                           "retirement_age_target": 60,
                           "current_savings": 2500000,
-                          "monthly_expenses": 120000
+                          "monthly_expenses": 120000,
+                          "debt_amount": 500000
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🌱 Young Aggressive Investor (25)",
+                        summary = "Complete guidance for 25-year-old aggressive investor",
+                        value = """
+                        {
+                          "age": 25,
+                          "income_range": "RANGE_50K_75K",
+                          "risk_tolerance": "AGGRESSIVE",
+                          "investment_experience": "BEGINNER",
+                          "interests": ["startups", "cryptocurrency", "growth stocks"],
+                          "financial_goals": ["WEALTH_BUILDING", "RETIREMENT", "EMERGENCY_FUND"],
+                          "employment_status": "EMPLOYED_FULL_TIME",
+                          "marital_status": "SINGLE",
+                          "current_savings": 80000,
+                          "monthly_expenses": 30000
                         }
                         """
                     )
@@ -741,592 +127,516 @@ public class FinancialAdvisoryController {
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Comprehensive investment guidance generated successfully",
+        description = "✅ Complete financial guidance generated successfully",
         content = @Content(
             mediaType = "application/json",
-            schema = @Schema(implementation = InvestmentGuidance.class),
+            schema = @Schema(implementation = Map.class),
+            examples = @ExampleObject(
+                name = "Complete Financial Guidance Response",
+                value = """
+                {
+                  "profile_analysis": {
+                    "summary": "28-year-old tech professional, moderate risk tolerance, beginner investor",
+                    "investment_capacity": 12750,
+                    "risk_profile": "Balanced Growth Strategy",
+                    "investment_horizon": "Long-term (30+ years)"
+                  },
+                  "investment_recommendations": {
+                    "asset_allocation": {
+                      "equity_percentage": 72,
+                      "debt_percentage": 18,
+                      "gold_percentage": 10,
+                      "rationale": "Age-based allocation with moderate risk adjustment"
+                    },
+                    "stocks": [
+                      {
+                        "name": "Infosys",
+                        "symbol": "INFY",
+                        "sector": "IT",
+                        "allocation": "10-15%",
+                        "rationale": "Aligns with tech interests"
+                      }
+                    ],
+                    "sips": [
+                      {
+                        "fund": "SBI Bluechip Fund",
+                        "type": "Large Cap",
+                        "amount": 6000,
+                        "returns": "10-12%"
+                      }
+                    ],
+                    "mutual_funds": [
+                      {
+                        "name": "HDFC Flexi Cap Fund",
+                        "category": "Flexi Cap",
+                        "returns_3yr": "15.2%"
+                      }
+                    ]
+                  },
+                  "monthly_plan": {
+                    "total_investment": 12750,
+                    "breakdown": [
+                      {
+                        "investment_name": "Equity SIPs",
+                        "monthly_amount": 6375,
+                        "percentage_of_total": "50%",
+                        "rationale": "Systematic investment in equity mutual funds for long-term wealth creation"
+                      },
+                      {
+                        "investment_name": "Direct Equity",
+                        "monthly_amount": 2550,
+                        "percentage_of_total": "20%",
+                        "rationale": "Direct stock investments for higher potential returns"
+                      },
+                      {
+                        "investment_name": "Debt Instruments",
+                        "monthly_amount": 2550,
+                        "percentage_of_total": "20%",
+                        "rationale": "Diversified debt instruments for stability"
+                      },
+                      {
+                        "investment_name": "Emergency Fund",
+                        "monthly_amount": 1275,
+                        "percentage_of_total": "10%",
+                        "rationale": "Emergency fund for unexpected expenses"
+                      }
+                    ],
+                    "sip_allocation": 6375,
+                    "direct_equity": 2550,
+                    "debt_allocation": 2550,
+                    "emergency_fund": 1275
+                  },
+                  "budgeting_advice": {
+                    "age_group": "Young Adult (20s)",
+                    "advice": "Young Adult Budgeting (20s):\\n- Follow 50/30/20 rule: 50% needs, 30% wants, 20% savings\\n- Prioritize building emergency fund first\\n- Keep housing costs under 30% of income\\n\\nGeneral Budgeting Tips:\\n- Track expenses for at least one month\\n- Use the envelope method for discretionary spending\\n- Automate savings and bill payments\\n- Review and adjust budget quarterly",
+                    "profile_complete": false
+                  },
+                  "retirement_planning": {
+                    "plan": "Personalized Retirement Planning:\\n\\nCurrent Age: 32\\nTarget Retirement Age: 65\\nYears to Retirement: 33\\n\\nMedium-Term Strategy (15-30 years):\\n- Balance growth with some stability\\n- Increase contribution rates annually\\n- Diversify across asset classes",
+                    "current_age": 32,
+                    "target_retirement_age": 65,
+                    "years_to_retirement": 33,
+                    "timeline": "Long-term (20+ years) - Focus on wealth creation"
+                  },
+                  "age_based_goals": {
+                    "goals": "Financial milestones for your age (28):\\n\\nIn Your 20s - Foundation Building:\\n- Build emergency fund (3-6 months expenses)\\n- Start investing early (even small amounts)\\n- Maximize employer 401(k) match\\n- Pay off high-interest debt\\n- Build good credit history",
+                    "age_group": "Young Adult (20s)"
+                  },
+                  "risk_management": {
+                    "diversification": "Across sectors and asset classes",
+                    "emergency_fund_months": 6,
+                    "insurance_needs": ["Term life", "Health insurance"]
+                  },
+                  "tax_optimization": {
+                    "elss_recommendation": 12500,
+                    "ltcg_strategy": "Hold >1 year for tax benefits",
+                    "section_80c_options": ["ELSS", "PPF", "NSC"]
+                  },
+                  "rebalancing_strategy": "Quarterly review recommended",
+                  "performance_tracking": "Track key metrics and adjust as needed",
+                  "important_disclaimers": ["This advice is for educational purposes only. Please consult with a qualified financial advisor for decisions specific to your situation."]
+                }
+                """
+            )
+        )
+    )
+    public ResponseEntity<Map<String, Object>> getComprehensiveGuidance(
+            @Valid @RequestBody FinancialProfile profile) {
+        
+        log.info("Generating comprehensive financial guidance for age: {}, interests: {}", 
+                profile.getAge(), profile.getInterests());
+        
+        try {
+            // Get comprehensive investment guidance
+            InvestmentGuidance investmentGuidance = investmentGuidanceService.generatePersonalizedInvestmentGuidance(profile);
+            
+            // Get budgeting advice
+            String budgetingAdvice = financialAdvisoryService.generateBudgetingAdvice(profile);
+            
+            // Get retirement planning
+            String retirementPlan = financialAdvisoryService.generateRetirementPlan(profile);
+            
+            // Get age-based goals
+            String ageBasedGoals = financialAdvisoryService.generateAgeBasedGoals(profile.getAge(), profile);
+            
+            // Build comprehensive response
+            Map<String, Object> response = new java.util.HashMap<>();
+            
+            // Profile Analysis
+            Map<String, Object> profileAnalysis = new java.util.HashMap<>();
+            profileAnalysis.put("summary", investmentGuidance.getUserProfileSummary());
+            profileAnalysis.put("investment_capacity", investmentGuidance.getMonthlyInvestmentPlan().getTotalMonthlyInvestment());
+            profileAnalysis.put("risk_profile", investmentGuidance.getInvestmentStrategy().getApproach());
+            profileAnalysis.put("investment_horizon", investmentGuidance.getInvestmentStrategy().getInvestmentHorizon());
+            profileAnalysis.put("profile_completeness", financialAdvisoryService.isProfileComplete(profile));
+            response.put("profile_analysis", profileAnalysis);
+            
+            // Investment Recommendations
+            Map<String, Object> investmentRecommendations = new java.util.HashMap<>();
+            investmentRecommendations.put("asset_allocation", investmentGuidance.getAssetAllocation());
+            investmentRecommendations.put("stocks", investmentGuidance.getStockRecommendations());
+            investmentRecommendations.put("sips", investmentGuidance.getSipRecommendations());
+            investmentRecommendations.put("mutual_funds", investmentGuidance.getMutualFundRecommendations());
+            investmentRecommendations.put("etfs", investmentGuidance.getEtfRecommendations());
+            investmentRecommendations.put("bonds", investmentGuidance.getBondRecommendations());
+            investmentRecommendations.put("alternatives", investmentGuidance.getAlternativeInvestments());
+            response.put("investment_recommendations", investmentRecommendations);
+            
+            // Monthly Plan
+            Map<String, Object> monthlyPlan = new java.util.HashMap<>();
+            monthlyPlan.put("total_investment", investmentGuidance.getMonthlyInvestmentPlan().getTotalMonthlyInvestment());
+            monthlyPlan.put("breakdown", investmentGuidance.getMonthlyInvestmentPlan().getInvestmentBreakdown());
+            monthlyPlan.put("sip_allocation", investmentGuidance.getMonthlyInvestmentPlan().getSipAllocation());
+            monthlyPlan.put("direct_equity", investmentGuidance.getMonthlyInvestmentPlan().getDirectEquityAllocation());
+            monthlyPlan.put("debt_allocation", investmentGuidance.getMonthlyInvestmentPlan().getDebtAllocation());
+            monthlyPlan.put("emergency_fund", investmentGuidance.getMonthlyInvestmentPlan().getEmergencyFundAllocation());
+            response.put("monthly_plan", monthlyPlan);
+            
+            // Budgeting Advice
+            Map<String, Object> budgetingAdviceMap = new java.util.HashMap<>();
+            budgetingAdviceMap.put("age_group", getAgeGroup(profile.getAge()));
+            budgetingAdviceMap.put("advice", budgetingAdvice);
+            budgetingAdviceMap.put("profile_complete", financialAdvisoryService.isProfileComplete(profile));
+            response.put("budgeting_advice", budgetingAdviceMap);
+            
+            // Retirement Planning
+            Map<String, Object> retirementPlanningMap = new java.util.HashMap<>();
+            retirementPlanningMap.put("plan", retirementPlan);
+            retirementPlanningMap.put("current_age", profile.getAge());
+            retirementPlanningMap.put("target_retirement_age", profile.getRetirementAgeTarget() != null ? profile.getRetirementAgeTarget() : 60);
+            retirementPlanningMap.put("years_to_retirement", calculateYearsToRetirement(profile));
+            retirementPlanningMap.put("timeline", investmentGuidance.getInvestmentTimeline());
+            response.put("retirement_planning", retirementPlanningMap);
+            
+            // Age-based Goals
+            Map<String, Object> ageBasedGoalsMap = new java.util.HashMap<>();
+            ageBasedGoalsMap.put("goals", ageBasedGoals);
+            ageBasedGoalsMap.put("age_group", getAgeGroup(profile.getAge()));
+            response.put("age_based_goals", ageBasedGoalsMap);
+            
+            // Add other components
+            response.put("risk_management", investmentGuidance.getRiskManagement());
+            response.put("tax_optimization", investmentGuidance.getTaxOptimization());
+            response.put("rebalancing_strategy", investmentGuidance.getRebalancingStrategy());
+            response.put("performance_tracking", investmentGuidance.getPerformanceTracking());
+            response.put("important_disclaimers", investmentGuidance.getImportantDisclaimers());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error generating comprehensive financial guidance: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Unable to generate comprehensive guidance at this time"));
+        }
+    }
+
+    @PostMapping("/chat")
+    @Operation(
+        summary = "💬 Interactive Financial Advisory Chat",
+        description = "**CONVERSATIONAL ENDPOINT** - Chat with the financial advisor AI for personalized advice, questions, and guidance. Supports context-aware conversations with financial profile integration.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Chat message with optional financial profile for personalized responses",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ChatRequest.class),
+                examples = {
+                    @ExampleObject(
+                        name = "💡 Investment Question",
+                        summary = "Ask specific investment questions",
+                        value = """
+                        {
+                          "message": "I'm 28 and work in tech. Should I invest in individual stocks or mutual funds? I have ₹50,000 to start with.",
+                          "session_id": "tech-professional-session",
+                          "advisory_mode": "INVESTMENT_FOCUSED",
+                          "financial_profile": {
+                            "age": 28,
+                            "income_range": "RANGE_75K_100K",
+                            "risk_tolerance": "MODERATE",
+                            "interests": ["technology", "artificial intelligence"],
+                            "current_savings": 50000
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🏠 Home Buying Query",
+                        summary = "Questions about home purchase planning",
+                        value = """
+                        {
+                          "message": "I want to buy a house in 5 years. How should I plan my investments and savings?",
+                          "session_id": "home-buyer-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 32,
+                            "income_range": "RANGE_100K_150K",
+                            "financial_goals": ["HOME_PURCHASE"],
+                            "current_savings": 300000
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🎯 Retirement Planning",
+                        summary = "Retirement planning discussions",
+                        value = """
+                        {
+                          "message": "I'm 45 and want to retire by 55. Am I on track? What should I change in my investment strategy?",
+                          "session_id": "early-retirement-session",
+                          "advisory_mode": "RETIREMENT_PLANNING",
+                          "financial_profile": {
+                            "age": 45,
+                            "retirement_age_target": 55,
+                            "current_savings": 1500000,
+                            "risk_tolerance": "MODERATE"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "📊 General Financial Advice",
+                        summary = "General financial questions",
+                        value = """
+                        {
+                          "message": "What's the difference between ELSS and regular mutual funds? Which is better for tax saving?",
+                          "session_id": "general-query-session",
+                          "advisory_mode": "GENERAL"
+                        }
+                        """
+                    )
+                }
+            )
+        )
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "✅ Personalized financial advice response",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ChatResponse.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                      "id": "financial-advice-123",
+                      "session_id": "tech-professional-session",
+                      "message": "Great question! At 28 with your tech background and ₹50,000 to start, here's my personalized advice:\\n\\n**For beginners like you, I recommend starting with mutual funds:**\\n\\n🎯 **Why Mutual Funds First:**\\n- Professional management\\n- Instant diversification\\n- Lower risk than individual stocks\\n- Perfect for ₹50,000 starting amount\\n\\n📈 **Recommended Allocation:**\\n- Large Cap SIP: ₹20,000 (SBI Bluechip Fund)\\n- Flexi Cap SIP: ₹15,000 (HDFC Flexi Cap)\\n- Tech Sector Fund: ₹10,000 (aligns with your interests)\\n- Emergency Fund: ₹5,000\\n\\n💡 **Next Steps:**\\n1. Start SIPs immediately\\n2. Increase by 10% annually\\n3. After 2-3 years, consider direct stocks\\n\\n⚠️ **Important**: This advice is based on your profile. Consult a financial advisor for personalized guidance.",
+                      "model_name": "gpt-3.5-turbo",
+                      "created_at": "2024-01-15T10:30:00",
+                      "token_count": 180,
+                      "advisory_mode": "INVESTMENT_FOCUSED",
+                      "profile_based": true
+                    }
+                    """
+                )
+            )
+        )
+    })
+    public ResponseEntity<ChatResponse> getFinancialAdvice(
+            @Valid @RequestBody ChatRequest request) {
+        
+        log.info("Received financial advisory chat request for session: {}", request.getSessionId());
+        
+        try {
+            ChatResponse response = financialAdvisoryService.generateFinancialAdvice(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error generating financial advice: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body(ChatResponse.builder()
+                    .message("I apologize, but I'm having trouble processing your request right now. Please try again later.")
+                    .sessionId(request.getSessionId())
+                    .build());
+        }
+    }
+
+    @GetMapping("/profile-template")
+    @Operation(
+        summary = "📋 Get Financial Profile Template & Options",
+        description = "**HELPER ENDPOINT** - Get complete template showing all available profile fields, their types, options, and example values for building financial profiles."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "✅ Complete profile template with all options",
+        content = @Content(
+            mediaType = "application/json",
             examples = @ExampleObject(
                 value = """
                 {
-                  "user_profile_summary": "Investor Profile: 28 years old, moderate risk tolerance, beginner investment experience, 75K-100K income range, interested in: technology, artificial intelligence, startups",
-                  "investment_strategy": {
-                    "approach": "Balanced Growth Strategy",
-                    "rationale": "Focus on long-term wealth creation through equity investments with time advantage for compounding",
-                    "key_principles": ["Start early and invest regularly through SIPs", "Diversify across asset classes and sectors"],
-                    "investment_horizon": "Long-term (20+ years) - Focus on wealth creation"
-                  },
-                  "asset_allocation": {
-                    "equity_percentage": 75,
-                    "debt_percentage": 15,
-                    "gold_percentage": 10,
-                    "international_percentage": 10,
-                    "alternative_percentage": 5,
-                    "rationale": "Age-based allocation (28 years) with moderate risk tolerance adjustment"
-                  },
-                  "stock_recommendations": [
-                    {
-                      "stock_name": "Infosys",
-                      "stock_symbol": "INFY",
-                      "sector": "Information Technology",
-                      "investment_rationale": "Global IT services leader with strong digital transformation capabilities",
-                      "target_allocation": "10-15%",
-                      "risk_level": "Medium",
-                      "time_horizon": "3-5 years",
-                      "why_suitable": "Aligns with your interest in technology and offers exposure to global IT services"
+                  "required_fields": {
+                    "age": {
+                      "type": "Integer",
+                      "range": "18-100",
+                      "description": "Your current age for age-appropriate recommendations"
+                    },
+                    "risk_tolerance": {
+                      "type": "Enum",
+                      "options": ["CONSERVATIVE", "MODERATE", "AGGRESSIVE"],
+                      "descriptions": {
+                        "CONSERVATIVE": "Prefer stable, low-risk investments",
+                        "MODERATE": "Balanced approach to risk and return",
+                        "AGGRESSIVE": "Comfortable with high-risk, high-reward investments"
+                      }
+                    },
+                    "investment_experience": {
+                      "type": "Enum",
+                      "options": ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
+                      "description": "Your investment knowledge and experience level"
+                    },
+                    "income_range": {
+                      "type": "Enum",
+                      "options": ["BELOW_25K", "RANGE_25K_50K", "RANGE_50K_75K", "RANGE_75K_100K", "RANGE_100K_150K", "ABOVE_150K"],
+                      "description": "Annual income range for investment capacity calculation"
                     }
-                  ],
-                  "sip_recommendations": [
-                    {
-                      "fund_name": "SBI Bluechip Fund",
-                      "fund_type": "Large Cap Equity",
-                      "recommended_amount": 6000,
-                      "sip_frequency": "Monthly",
-                      "expected_returns": "10-12% annually",
-                      "risk_level": "Medium",
-                      "investment_rationale": "Invests in large-cap stocks providing stability and consistent returns",
-                      "minimum_tenure": "5+ years"
+                  },
+                  "optional_fields": {
+                    "interests": {
+                      "type": "Array[String]",
+                      "examples": ["technology", "healthcare", "real estate", "environment", "education"],
+                      "description": "Personal interests for aligned investment recommendations"
+                    },
+                    "financial_goals": {
+                      "type": "Array[Enum]",
+                      "options": ["RETIREMENT", "EMERGENCY_FUND", "HOME_PURCHASE", "CHILD_EDUCATION", "WEALTH_BUILDING", "DEBT_PAYOFF", "TRAVEL", "BUSINESS_INVESTMENT"],
+                      "description": "Your financial objectives and goals"
+                    },
+                    "current_savings": {
+                      "type": "BigDecimal",
+                      "description": "Current total savings amount"
+                    },
+                    "monthly_expenses": {
+                      "type": "BigDecimal", 
+                      "description": "Monthly expenses for investment capacity calculation"
+                    },
+                    "employment_status": {
+                      "type": "Enum",
+                      "options": ["EMPLOYED_FULL_TIME", "EMPLOYED_PART_TIME", "SELF_EMPLOYED", "UNEMPLOYED", "RETIRED", "STUDENT"],
+                      "description": "Current employment situation"
+                    },
+                    "marital_status": {
+                      "type": "Enum",
+                      "options": ["SINGLE", "MARRIED", "DIVORCED", "WIDOWED"],
+                      "description": "Marital status affecting financial planning"
+                    },
+                    "number_of_dependents": {
+                      "type": "Integer",
+                      "description": "Number of financial dependents"
+                    },
+                    "retirement_age_target": {
+                      "type": "Integer",
+                      "description": "Target retirement age for planning"
                     }
-                  ],
-                  "monthly_investment_plan": {
-                    "total_monthly_investment": 15000,
-                    "sip_allocation": 7500,
-                    "direct_equity_allocation": 3000,
-                    "debt_allocation": 3000,
-                    "emergency_fund_allocation": 1500
+                  },
+                  "sample_profiles": {
+                    "young_professional": {
+                      "age": 28,
+                      "risk_tolerance": "MODERATE",
+                      "investment_experience": "BEGINNER",
+                      "income_range": "RANGE_75K_100K",
+                      "interests": ["technology", "startups"],
+                      "financial_goals": ["RETIREMENT", "HOME_PURCHASE"]
+                    },
+                    "mid_career_parent": {
+                      "age": 38,
+                      "risk_tolerance": "MODERATE",
+                      "investment_experience": "INTERMEDIATE", 
+                      "income_range": "RANGE_100K_150K",
+                      "interests": ["education", "healthcare"],
+                      "financial_goals": ["RETIREMENT", "CHILD_EDUCATION"],
+                      "number_of_dependents": 2
+                    }
                   }
                 }
                 """
             )
         )
     )
-    public ResponseEntity<InvestmentGuidance> getComprehensiveInvestmentGuidance(
-            @Valid @RequestBody FinancialProfile profile) {
+    public ResponseEntity<Map<String, Object>> getProfileTemplate() {
         
-        log.info("Generating comprehensive investment guidance for age: {}", profile.getAge());
-        
-        try {
-            InvestmentGuidance guidance = investmentGuidanceService.generatePersonalizedInvestmentGuidance(profile);
-            return ResponseEntity.ok(guidance);
-        } catch (Exception e) {
-            log.error("Error generating comprehensive investment guidance: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PostMapping("/investment-guidance/stocks")
-    @Operation(
-        summary = "Get personalized stock recommendations",
-        description = "Get specific stock recommendations based on age, risk tolerance, and personal interests including IT, healthcare, banking, and growth stocks",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for stock recommendations",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Tech Enthusiast",
-                        value = """
-                        {
-                          "age": 32,
-                          "risk_tolerance": "MODERATE",
-                          "interests": ["technology", "artificial intelligence", "software"],
-                          "investment_experience": "INTERMEDIATE"
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Healthcare Professional",
-                        value = """
-                        {
-                          "age": 29,
-                          "risk_tolerance": "AGGRESSIVE",
-                          "interests": ["healthcare", "pharmaceuticals", "medical research"],
-                          "investment_experience": "BEGINNER"
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Stock recommendations generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "stock_recommendations": [
-                    {
-                      "stock_name": "Infosys",
-                      "stock_symbol": "INFY",
-                      "sector": "Information Technology",
-                      "investment_rationale": "Global IT services leader with strong digital transformation capabilities",
-                      "target_allocation": "10-15%",
-                      "risk_level": "Medium",
-                      "time_horizon": "3-5 years",
-                      "why_suitable": "Aligns with your interest in technology and offers exposure to global IT services"
-                    },
-                    {
-                      "stock_name": "TCS",
-                      "stock_symbol": "TCS",
-                      "sector": "Information Technology",
-                      "investment_rationale": "India's largest IT services company with strong global presence",
-                      "target_allocation": "8-12%",
-                      "risk_level": "Medium",
-                      "time_horizon": "3-7 years",
-                      "why_suitable": "Premium IT stock with strong fundamentals and regular dividends"
-                    }
-                  ]
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getStockRecommendations(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating stock recommendations for profile with interests: {}", profile.getInterests());
-        
-        try {
-            List<InvestmentGuidance.StockRecommendation> recommendations = 
-                investmentGuidanceService.generateStockRecommendations(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "stock_recommendations", recommendations,
-                "total_recommendations", recommendations.size(),
-                "profile_age", profile.getAge() != null ? profile.getAge() : "Not provided",
-                "risk_tolerance", profile.getRiskTolerance() != null ? profile.getRiskTolerance() : "Not provided"
-            ));
-        } catch (Exception e) {
-            log.error("Error generating stock recommendations: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate stock recommendations at this time"));
-        }
-    }
-
-    @PostMapping("/investment-guidance/sip")
-    @Operation(
-        summary = "Get personalized SIP recommendations",
-        description = "Get systematic investment plan recommendations with specific mutual funds, amounts, and tenure based on your financial profile",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for SIP recommendations",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Young Professional Starting SIPs",
-                        value = """
-                        {
-                          "age": 25,
-                          "income_range": "RANGE_50K_75K",
-                          "risk_tolerance": "MODERATE",
-                          "investment_experience": "BEGINNER",
-                          "financial_goals": ["RETIREMENT", "EMERGENCY_FUND"],
-                          "current_savings": 50000,
-                          "monthly_expenses": 35000
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Mid-Career Investor",
-                        value = """
-                        {
-                          "age": 35,
-                          "income_range": "RANGE_100K_150K",
-                          "risk_tolerance": "AGGRESSIVE",
-                          "investment_experience": "INTERMEDIATE",
-                          "financial_goals": ["RETIREMENT", "CHILD_EDUCATION"],
-                          "current_savings": 800000,
-                          "monthly_expenses": 75000
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "SIP recommendations generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "sip_recommendations": [
-                    {
-                      "fund_name": "SBI Bluechip Fund",
-                      "fund_type": "Large Cap Equity",
-                      "recommended_amount": 4000,
-                      "sip_frequency": "Monthly",
-                      "expected_returns": "10-12% annually",
-                      "risk_level": "Medium",
-                      "investment_rationale": "Invests in large-cap stocks providing stability and consistent returns",
-                      "minimum_tenure": "5+ years"
-                    },
-                    {
-                      "fund_name": "HDFC Flexi Cap Fund",
-                      "fund_type": "Flexi Cap Equity",
-                      "recommended_amount": 3000,
-                      "sip_frequency": "Monthly",
-                      "expected_returns": "12-15% annually",
-                      "risk_level": "Medium-High",
-                      "investment_rationale": "Flexible allocation across market caps for optimal risk-return balance",
-                      "minimum_tenure": "7+ years"
-                    }
-                  ],
-                  "total_monthly_sip": 7000,
-                  "recommended_monthly_investment": 10000
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getSIPRecommendations(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating SIP recommendations for age: {}", profile.getAge());
-        
-        try {
-            List<InvestmentGuidance.SIPRecommendation> recommendations = 
-                investmentGuidanceService.generateSIPRecommendations(profile);
-            
-            // Calculate total monthly SIP amount
-            double totalMonthlySIP = recommendations.stream()
-                .mapToDouble(sip -> sip.getRecommendedAmount().doubleValue())
-                .sum();
-            
-            return ResponseEntity.ok(Map.of(
-                "sip_recommendations", recommendations,
-                "total_monthly_sip", totalMonthlySIP,
-                "recommended_monthly_investment", investmentGuidanceService.calculateRecommendedMonthlyInvestment(profile),
-                "number_of_sips", recommendations.size()
-            ));
-        } catch (Exception e) {
-            log.error("Error generating SIP recommendations: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate SIP recommendations at this time"));
-        }
-    }
-
-    @PostMapping("/investment-guidance/mutual-funds")
-    @Operation(
-        summary = "Get mutual fund recommendations",
-        description = "Get detailed mutual fund recommendations across categories with historical returns, expense ratios, and fund house information",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for mutual fund recommendations",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    name = "Balanced Investor",
-                    value = """
-                    {
-                      "age": 40,
-                      "risk_tolerance": "MODERATE",
-                      "investment_experience": "INTERMEDIATE",
-                      "financial_goals": ["RETIREMENT", "CHILD_EDUCATION"]
-                    }
-                    """
+        Map<String, Object> requiredFields = Map.of(
+            "age", Map.of(
+                "type", "Integer",
+                "range", "18-100",
+                "description", "Your current age for age-appropriate recommendations"
+            ),
+            "risk_tolerance", Map.of(
+                "type", "Enum",
+                "options", List.of("CONSERVATIVE", "MODERATE", "AGGRESSIVE"),
+                "descriptions", Map.of(
+                    "CONSERVATIVE", "Prefer stable, low-risk investments",
+                    "MODERATE", "Balanced approach to risk and return",
+                    "AGGRESSIVE", "Comfortable with high-risk, high-reward investments"
                 )
+            ),
+            "investment_experience", Map.of(
+                "type", "Enum",
+                "options", List.of("BEGINNER", "INTERMEDIATE", "ADVANCED"),
+                "description", "Your investment knowledge and experience level"
+            ),
+            "income_range", Map.of(
+                "type", "Enum",
+                "options", List.of("BELOW_25K", "RANGE_25K_50K", "RANGE_50K_75K", "RANGE_75K_100K", "RANGE_100K_150K", "ABOVE_150K"),
+                "description", "Annual income range for investment capacity calculation"
             )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Mutual fund recommendations generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "mutual_fund_recommendations": [
-                    {
-                      "fund_name": "ICICI Prudential Bluechip Fund",
-                      "fund_category": "Large Cap",
-                      "fund_house": "ICICI Prudential",
-                      "expense_ratio": "1.05%",
-                      "historical_returns": {
-                        "1_year": "12.5%",
-                        "3_year": "15.2%",
-                        "5_year": "13.8%"
-                      },
-                      "investment_rationale": "Consistent performer in large-cap category with experienced fund management",
-                      "suitable_for": "Conservative to moderate risk investors seeking steady returns"
-                    }
-                  ]
-                }
-                """
+        );
+        
+        Map<String, Object> optionalFields = Map.of(
+            "interests", Map.of(
+                "type", "Array[String]",
+                "examples", List.of("technology", "healthcare", "real estate", "environment", "education", "travel", "renewable energy", "artificial intelligence"),
+                "description", "Personal interests for aligned investment recommendations"
+            ),
+            "financial_goals", Map.of(
+                "type", "Array[Enum]",
+                "options", List.of("RETIREMENT", "EMERGENCY_FUND", "HOME_PURCHASE", "CHILD_EDUCATION", "WEALTH_BUILDING", "DEBT_PAYOFF", "TRAVEL", "BUSINESS_INVESTMENT"),
+                "description", "Your financial objectives and goals"
+            ),
+            "current_savings", Map.of(
+                "type", "BigDecimal",
+                "description", "Current total savings amount"
+            ),
+            "monthly_expenses", Map.of(
+                "type", "BigDecimal",
+                "description", "Monthly expenses for investment capacity calculation"
             )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getMutualFundRecommendations(
-            @Valid @RequestBody FinancialProfile profile) {
+        );
         
-        log.info("Generating mutual fund recommendations for risk tolerance: {}", profile.getRiskTolerance());
+        Map<String, Object> sampleProfiles = Map.of(
+            "young_professional", Map.of(
+                "age", 28,
+                "risk_tolerance", "MODERATE",
+                "investment_experience", "BEGINNER",
+                "income_range", "RANGE_75K_100K",
+                "interests", List.of("technology", "startups"),
+                "financial_goals", List.of("RETIREMENT", "HOME_PURCHASE")
+            ),
+            "mid_career_parent", Map.of(
+                "age", 38,
+                "risk_tolerance", "MODERATE",
+                "investment_experience", "INTERMEDIATE",
+                "income_range", "RANGE_100K_150K",
+                "interests", List.of("education", "healthcare"),
+                "financial_goals", List.of("RETIREMENT", "CHILD_EDUCATION"),
+                "number_of_dependents", 2
+            )
+        );
         
-        try {
-            List<InvestmentGuidance.MutualFundRecommendation> recommendations = 
-                investmentGuidanceService.generateMutualFundRecommendations(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "mutual_fund_recommendations", recommendations,
-                "categories_covered", recommendations.stream()
-                    .map(InvestmentGuidance.MutualFundRecommendation::getFundCategory)
-                    .distinct()
-                    .toList(),
-                "total_funds", recommendations.size()
-            ));
-        } catch (Exception e) {
-            log.error("Error generating mutual fund recommendations: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate mutual fund recommendations at this time"));
-        }
+        Map<String, Object> response = Map.of(
+            "required_fields", requiredFields,
+            "optional_fields", optionalFields,
+            "sample_profiles", sampleProfiles,
+            "total_endpoints", 3,
+            "endpoint_descriptions", Map.of(
+                "comprehensive-guidance", "Complete financial & investment guidance - ALL recommendations in one call",
+                "chat", "Interactive financial advisory conversations with AI",
+                "profile-template", "Helper endpoint for profile structure and options"
+            )
+        );
+        
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/investment-guidance/etf")
-    @Operation(
-        summary = "Get ETF recommendations",
-        description = "Get Exchange Traded Fund recommendations including index ETFs, sector ETFs, and commodity ETFs with expense ratios and liquidity information",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for ETF recommendations",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "age": 30,
-                      "risk_tolerance": "MODERATE",
-                      "investment_experience": "INTERMEDIATE",
-                      "interests": ["diversification", "low-cost investing"]
-                    }
-                    """
-                )
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "ETF recommendations generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "etf_recommendations": [
-                    {
-                      "etf_name": "SBI ETF Nifty 50",
-                      "etf_symbol": "SETFNIF50",
-                      "underlying_index": "Nifty 50",
-                      "expense_ratio": "0.10%",
-                      "investment_rationale": "Low-cost exposure to India's top 50 companies with high liquidity",
-                      "liquidity": "High"
-                    }
-                  ]
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getETFRecommendations(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating ETF recommendations");
-        
-        try {
-            List<InvestmentGuidance.ETFRecommendation> recommendations = 
-                investmentGuidanceService.generateETFRecommendations(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "etf_recommendations", recommendations,
-                "average_expense_ratio", calculateAverageExpenseRatio(recommendations),
-                "total_etfs", recommendations.size()
-            ));
-        } catch (Exception e) {
-            log.error("Error generating ETF recommendations: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate ETF recommendations at this time"));
-        }
-    }
-
-    @PostMapping("/investment-guidance/monthly-plan")
-    @Operation(
-        summary = "Get personalized monthly investment plan",
-        description = "Get a detailed monthly investment plan with allocation across SIPs, direct equity, debt instruments, and emergency fund based on income and expenses",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for monthly investment plan",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Young Professional",
-                        value = """
-                        {
-                          "age": 27,
-                          "income_range": "RANGE_75K_100K",
-                          "current_savings": 200000,
-                          "monthly_expenses": 50000,
-                          "risk_tolerance": "MODERATE",
-                          "financial_goals": ["RETIREMENT", "HOME_PURCHASE"]
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Experienced Investor",
-                        value = """
-                        {
-                          "age": 42,
-                          "income_range": "RANGE_100K_150K",
-                          "current_savings": 1500000,
-                          "monthly_expenses": 85000,
-                          "risk_tolerance": "AGGRESSIVE",
-                          "financial_goals": ["RETIREMENT", "CHILD_EDUCATION", "WEALTH_CREATION"]
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Monthly investment plan generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "monthly_investment_plan": {
-                    "total_monthly_investment": 20000,
-                    "sip_allocation": 10000,
-                    "direct_equity_allocation": 4000,
-                    "debt_allocation": 4000,
-                    "emergency_fund_allocation": 2000,
-                    "investment_breakdown": [
-                      {
-                        "investment_name": "Equity SIPs",
-                        "monthly_amount": 10000,
-                        "percentage_of_total": "50%",
-                        "rationale": "Systematic investment in equity mutual funds for long-term wealth creation"
-                      },
-                      {
-                        "investment_name": "Direct Equity",
-                        "monthly_amount": 4000,
-                        "percentage_of_total": "20%",
-                        "rationale": "Direct stock investments for higher potential returns"
-                      }
-                    ]
-                  },
-                  "estimated_annual_investment": 240000,
-                  "investment_capacity": "Based on income and expenses analysis"
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getMonthlyInvestmentPlan(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating monthly investment plan for income range: {}", profile.getIncomeRange());
-        
-        try {
-            InvestmentGuidance.MonthlyInvestmentPlan plan = 
-                investmentGuidanceService.createMonthlyInvestmentPlan(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "monthly_investment_plan", plan,
-                "estimated_annual_investment", plan.getTotalMonthlyInvestment().multiply(java.math.BigDecimal.valueOf(12)),
-                "investment_capacity", "Based on income and expenses analysis",
-                "breakdown_count", plan.getInvestmentBreakdown().size()
-            ));
-        } catch (Exception e) {
-            log.error("Error generating monthly investment plan: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate monthly investment plan at this time"));
-        }
-    }
-
-    @PostMapping("/investment-guidance/asset-allocation")
-    @Operation(
-        summary = "Get personalized asset allocation strategy",
-        description = "Get age-appropriate asset allocation across equity, debt, gold, international, and alternative investments with rationale",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Financial profile for asset allocation",
-            content = @Content(
-                mediaType = "application/json",
-                examples = {
-                    @ExampleObject(
-                        name = "Conservative Investor",
-                        value = """
-                        {
-                          "age": 50,
-                          "risk_tolerance": "CONSERVATIVE",
-                          "investment_experience": "INTERMEDIATE"
-                        }
-                        """
-                    ),
-                    @ExampleObject(
-                        name = "Aggressive Young Investor",
-                        value = """
-                        {
-                          "age": 25,
-                          "risk_tolerance": "AGGRESSIVE",
-                          "investment_experience": "BEGINNER"
-                        }
-                        """
-                    )
-                }
-            )
-        )
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Asset allocation strategy generated successfully",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                value = """
-                {
-                  "asset_allocation": {
-                    "equity_percentage": 65,
-                    "debt_percentage": 25,
-                    "gold_percentage": 10,
-                    "international_percentage": 10,
-                    "alternative_percentage": 5,
-                    "rationale": "Age-based allocation (35 years) with moderate risk tolerance adjustment"
-                  },
-                  "allocation_strategy": "Age-based with risk adjustment",
-                  "rebalancing_frequency": "Quarterly review recommended"
-                }
-                """
-            )
-        )
-    )
-    public ResponseEntity<Map<String, Object>> getAssetAllocation(
-            @Valid @RequestBody FinancialProfile profile) {
-        
-        log.info("Generating asset allocation for age: {} with risk tolerance: {}", 
-                profile.getAge(), profile.getRiskTolerance());
-        
-        try {
-            InvestmentGuidance.AssetAllocation allocation = 
-                investmentGuidanceService.generateAssetAllocation(profile);
-            
-            return ResponseEntity.ok(Map.of(
-                "asset_allocation", allocation,
-                "allocation_strategy", "Age-based with risk adjustment",
-                "rebalancing_frequency", "Quarterly review recommended",
-                "total_percentage", allocation.getEquityPercentage() + allocation.getDebtPercentage() + 
-                                  allocation.getGoldPercentage() + allocation.getInternationalPercentage() + 
-                                  allocation.getAlternativePercentage()
-            ));
-        } catch (Exception e) {
-            log.error("Error generating asset allocation: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Unable to generate asset allocation at this time"));
-        }
-    }
-
+    // Helper methods
     private String getAgeGroup(Integer age) {
         if (age == null) return "Unknown";
         if (age < 30) return "Young Adult (20s)";
@@ -1340,26 +650,8 @@ public class FinancialAdvisoryController {
         if (profile.getAge() == null) return null;
         
         int targetRetirementAge = profile.getRetirementAgeTarget() != null ? 
-            profile.getRetirementAgeTarget() : 65;
+            profile.getRetirementAgeTarget() : 60;
         
         return Math.max(0, targetRetirementAge - profile.getAge());
-    }
-
-    // Helper methods
-    private String calculateAverageExpenseRatio(List<InvestmentGuidance.ETFRecommendation> recommendations) {
-        if (recommendations.isEmpty()) return "N/A";
-        
-        double average = recommendations.stream()
-            .mapToDouble(etf -> {
-                try {
-                    return Double.parseDouble(etf.getExpenseRatio().replace("%", ""));
-                } catch (NumberFormatException e) {
-                    return 0.0;
-                }
-            })
-            .average()
-            .orElse(0.0);
-        
-        return String.format("%.2f%%", average);
     }
 }
