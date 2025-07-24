@@ -41,4 +41,11 @@ public class ChatResponse {
     
     @JsonProperty("finish_reason")
     private String finishReason;
+    
+    // Financial Advisory specific fields
+    @JsonProperty("advisory_mode")
+    private String advisoryMode;
+    
+    @JsonProperty("profile_based")
+    private Boolean profileBased;
 }

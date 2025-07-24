@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,37 +30,46 @@ public class FinancialAdvisoryServiceImpl implements FinancialAdvisoryService {
     public ChatResponse generateFinancialAdvice(ChatRequest request) {
         log.info("Generating financial advice for session: {}", request.getSessionId());
         
-        // Create personalized system context
-        String systemPrompt = createPersonalizedSystemPrompt(
-            request.getFinancialProfile(), 
-            request.getAdvisoryMode()
-        );
-        
-        // Enhance the user message with context
-        String enhancedMessage = enhanceMessageWithContext(request);
-        
-        // Create a new request with enhanced context
-        ChatRequest enhancedRequest = new ChatRequest();
-        enhancedRequest.setMessage(enhancedMessage);
-        enhancedRequest.setSessionId(request.getSessionId());
-        enhancedRequest.setModelName(request.getModelName());
-        enhancedRequest.setMaxTokens(request.getMaxTokens());
-        enhancedRequest.setTemperature(0.7); // Slightly more creative for advisory
-        
-        // Save system context as assistant message for continuity
-        if (request.getFinancialProfile() != null) {
-            saveSystemContext(request.getSessionId(), systemPrompt);
+        try {
+            // Build enhanced prompt with financial context
+            String enhancedPrompt = buildFinancialAdvisoryPrompt(request);
+            
+            // Create enhanced request for LLM
+            ChatRequest llmRequest = new ChatRequest();
+            llmRequest.setMessage(enhancedPrompt);
+            llmRequest.setSessionId(request.getSessionId());
+            llmRequest.setModelName(request.getModelName() != null ? request.getModelName() : "gpt-3.5-turbo");
+            llmRequest.setMaxTokens(request.getMaxTokens() != null ? request.getMaxTokens() : 1500);
+            llmRequest.setTemperature(request.getTemperature() != null ? request.getTemperature() : 0.7);
+            
+            // Get LLM response
+            ChatResponse llmResponse = llmService.generateResponse(llmRequest);
+            
+            // Enhance response with financial advisory context
+            return ChatResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .sessionId(request.getSessionId())
+                    .message(enhanceFinancialResponse(llmResponse.getMessage(), request))
+                    .modelName(llmResponse.getModelName())
+                    .createdAt(LocalDateTime.now())
+                    .tokenCount(llmResponse.getTokenCount())
+                    .totalTokens(llmResponse.getTotalTokens())
+                    .promptTokens(llmResponse.getPromptTokens())
+                    .completionTokens(llmResponse.getCompletionTokens())
+                    .advisoryMode(request.getAdvisoryMode() != null ? request.getAdvisoryMode().name() : null)
+                    .profileBased(request.getFinancialProfile() != null)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("Error generating financial advice: {}", e.getMessage(), e);
+            return ChatResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .sessionId(request.getSessionId())
+                    .message("I apologize, but I'm having trouble processing your request right now. Please try again later or contact support if the issue persists.")
+                    .modelName("fallback")
+                    .createdAt(LocalDateTime.now())
+                    .build();
         }
-        
-        // Generate response using base LLM service
-        ChatResponse response = llmService.generateResponse(enhancedRequest);
-        
-        // Add financial disclaimers if requested
-        if (request.getIncludeDisclaimers()) {
-            response.setMessage(addFinancialDisclaimers(response.getMessage()));
-        }
-        
-        return response;
     }
 
     @Override
@@ -429,5 +439,338 @@ public class FinancialAdvisoryServiceImpl implements FinancialAdvisoryService {
         } else {
             return "- Diversified funds aligned with your interests\n";
         }
+    }
+
+    private String buildFinancialAdvisoryPrompt(ChatRequest request) {
+        StringBuilder prompt = new StringBuilder();
+        
+        // System role and context
+        prompt.append("You are a professional financial advisor with expertise in Indian financial markets, investment products, real estate, vehicle financing, and comprehensive financial planning. ");
+        prompt.append("Provide detailed, practical, and personalized financial advice based on the user's profile and specific questions.\n\n");
+        
+        // Add user profile context if available
+        if (request.getFinancialProfile() != null) {
+            prompt.append("USER PROFILE:\n");
+            prompt.append(buildProfileContext(request.getFinancialProfile()));
+            prompt.append("\n");
+        }
+        
+        // Add advisory mode context
+        if (request.getAdvisoryMode() != null) {
+            prompt.append("ADVISORY FOCUS: ").append(getAdvisoryModeContext(request.getAdvisoryMode())).append("\n\n");
+        }
+        
+        // Add specific financial expertise context based on question type
+        String questionType = detectQuestionType(request.getMessage());
+        prompt.append("SPECIALIZED CONTEXT: ").append(getSpecializedContext(questionType)).append("\n\n");
+        
+        // Add the user's question
+        prompt.append("USER QUESTION: ").append(request.getMessage()).append("\n\n");
+        
+        // Add response guidelines
+        prompt.append("RESPONSE GUIDELINES:\n");
+        prompt.append("1. Provide specific, actionable advice tailored to the user's profile\n");
+        prompt.append("2. Include relevant calculations, timelines, and financial projections when applicable\n");
+        prompt.append("3. Mention specific Indian financial products, banks, and investment options\n");
+        prompt.append("4. Consider tax implications and regulatory aspects in India\n");
+        prompt.append("5. Provide step-by-step action plans where appropriate\n");
+        prompt.append("6. Include important disclaimers about financial risks\n");
+        prompt.append("7. Use emojis and formatting to make the response engaging and easy to read\n\n");
+        
+        prompt.append("Please provide comprehensive financial advice:");
+        
+        return prompt.toString();
+    }
+
+    private String buildProfileContext(FinancialProfile profile) {
+        StringBuilder context = new StringBuilder();
+        
+        if (profile.getAge() != null) {
+            context.append("- Age: ").append(profile.getAge()).append(" years\n");
+        }
+        if (profile.getIncomeRange() != null) {
+            context.append("- Income Range: ").append(profile.getIncomeRange().getDescription()).append("\n");
+        }
+        if (profile.getRiskTolerance() != null) {
+            context.append("- Risk Tolerance: ").append(profile.getRiskTolerance().getDescription()).append("\n");
+        }
+        if (profile.getInvestmentExperience() != null) {
+            context.append("- Investment Experience: ").append(profile.getInvestmentExperience().name()).append("\n");
+        }
+        if (profile.getCurrentSavings() != null) {
+            context.append("- Current Savings: ₹").append(profile.getCurrentSavings()).append("\n");
+        }
+        if (profile.getMonthlyExpenses() != null) {
+            context.append("- Monthly Expenses: ₹").append(profile.getMonthlyExpenses()).append("\n");
+        }
+        if (profile.getEmploymentStatus() != null) {
+            context.append("- Employment: ").append(profile.getEmploymentStatus().name()).append("\n");
+        }
+        if (profile.getMaritalStatus() != null) {
+            context.append("- Marital Status: ").append(profile.getMaritalStatus().name()).append("\n");
+        }
+        if (profile.getNumberOfDependents() != null && profile.getNumberOfDependents() > 0) {
+            context.append("- Dependents: ").append(profile.getNumberOfDependents()).append("\n");
+        }
+        if (profile.getInterests() != null && !profile.getInterests().isEmpty()) {
+            context.append("- Interests: ").append(String.join(", ", profile.getInterests())).append("\n");
+        }
+        if (profile.getFinancialGoals() != null && !profile.getFinancialGoals().isEmpty()) {
+            context.append("- Financial Goals: ").append(profile.getFinancialGoals().toString()).append("\n");
+        }
+        if (profile.getRetirementAgeTarget() != null) {
+            context.append("- Target Retirement Age: ").append(profile.getRetirementAgeTarget()).append("\n");
+        }
+        if (profile.getDebtAmount() != null && profile.getDebtAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            context.append("- Current Debt: ₹").append(profile.getDebtAmount()).append("\n");
+        }
+        
+        return context.toString();
+    }
+
+    private String getAdvisoryModeContext(ChatRequest.AdvisoryMode mode) {
+        return switch (mode) {
+            case GENERAL -> "General financial planning and advice";
+            case INVESTMENT_FOCUSED -> "Investment recommendations, portfolio optimization, and wealth building strategies";
+            case BUDGETING -> "Budget planning, expense management, and financial discipline";
+            case RETIREMENT_PLANNING -> "Retirement corpus calculation, pension planning, and post-retirement financial security";
+            case DEBT_MANAGEMENT -> "Debt consolidation, EMI optimization, and debt-free strategies";
+            case TAX_PLANNING -> "Tax-saving investments, deductions under various sections, and tax optimization";
+            case INSURANCE_PLANNING -> "Life insurance, health insurance, and comprehensive risk coverage";
+            case EMERGENCY_FUND -> "Emergency fund creation, liquidity management, and financial safety nets";
+        };
+    }
+
+    private String detectQuestionType(String message) {
+        String lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.contains("house") || lowerMessage.contains("home") || lowerMessage.contains("property") || 
+            lowerMessage.contains("real estate") || lowerMessage.contains("flat") || lowerMessage.contains("apartment")) {
+            return "REAL_ESTATE";
+        } else if (lowerMessage.contains("car") || lowerMessage.contains("vehicle") || lowerMessage.contains("bike") || 
+                   lowerMessage.contains("auto loan") || lowerMessage.contains("automobile")) {
+            return "VEHICLE_FINANCE";
+        } else if (lowerMessage.contains("loan") || lowerMessage.contains("emi") || lowerMessage.contains("interest rate") || 
+                   lowerMessage.contains("mortgage") || lowerMessage.contains("credit")) {
+            return "LOAN_FINANCE";
+        } else if (lowerMessage.contains("education") || lowerMessage.contains("college") || lowerMessage.contains("school") || 
+                   lowerMessage.contains("child") || lowerMessage.contains("study")) {
+            return "EDUCATION_PLANNING";
+        } else if (lowerMessage.contains("business") || lowerMessage.contains("startup") || lowerMessage.contains("entrepreneur")) {
+            return "BUSINESS_FINANCE";
+        } else if (lowerMessage.contains("marriage") || lowerMessage.contains("wedding") || lowerMessage.contains("family")) {
+            return "LIFE_EVENTS";
+        } else if (lowerMessage.contains("travel") || lowerMessage.contains("vacation") || lowerMessage.contains("holiday")) {
+            return "TRAVEL_PLANNING";
+        } else if (lowerMessage.contains("investment") || lowerMessage.contains("sip") || lowerMessage.contains("mutual fund") || 
+                   lowerMessage.contains("stock") || lowerMessage.contains("equity")) {
+            return "INVESTMENT";
+        } else {
+            return "GENERAL";
+        }
+    }
+
+    private String getSpecializedContext(String questionType) {
+        return switch (questionType) {
+            case "REAL_ESTATE" -> """
+                REAL ESTATE & PROPERTY EXPERTISE:
+                - Home loan eligibility, interest rates, and EMI calculations
+                - Property valuation, location analysis, and market trends
+                - Down payment planning and funding strategies
+                - Stamp duty, registration costs, and hidden expenses
+                - RERA compliance, legal verification, and documentation
+                - Property investment vs. self-occupation analysis
+                - Tax benefits under Section 80C, 24(b), and capital gains
+                - Home insurance and property maintenance costs
+                - Rental yield calculations and property management
+                - Real estate market cycles and timing considerations
+                """;
+                
+            case "VEHICLE_FINANCE" -> """
+                VEHICLE FINANCING EXPERTISE:
+                - Auto loan vs. personal loan comparison
+                - Down payment optimization and loan tenure planning
+                - Interest rate negotiations and bank comparisons
+                - Vehicle insurance, maintenance, and depreciation costs
+                - New vs. used vehicle financial analysis
+                - Electric vehicle incentives and financing options
+                - Vehicle loan prepayment strategies
+                - Two-wheeler vs. four-wheeler financing decisions
+                - Commercial vehicle financing for business use
+                - Vehicle upgrade and replacement planning
+                """;
+                
+            case "LOAN_FINANCE" -> """
+                LOAN & CREDIT EXPERTISE:
+                - Personal loan, business loan, and specialized lending options
+                - Interest rate types (fixed vs. floating) and negotiations
+                - EMI calculations, loan tenure optimization, and prepayment strategies
+                - Credit score improvement and loan eligibility enhancement
+                - Loan consolidation and debt restructuring options
+                - Collateral vs. unsecured loan considerations
+                - Co-applicant benefits and joint loan applications
+                - Loan insurance and protection schemes
+                - Balance transfer options and refinancing strategies
+                - Default management and legal implications
+                """;
+                
+            case "EDUCATION_PLANNING" -> """
+                EDUCATION FINANCING EXPERTISE:
+                - Education loan eligibility, limits, and interest rates
+                - Collateral vs. non-collateral education loans
+                - Study abroad financing and forex considerations
+                - Education savings plans and child-specific investments
+                - Scholarship opportunities and grant applications
+                - Professional course financing (MBA, medical, engineering)
+                - Education insurance and student protection plans
+                - Tax benefits on education expenses and loan interest
+                - Career ROI analysis and course selection guidance
+                - Education inflation planning and corpus calculation
+                """;
+                
+            case "BUSINESS_FINANCE" -> """
+                BUSINESS & ENTREPRENEURSHIP EXPERTISE:
+                - Startup funding options (bootstrapping, angel investors, VCs)
+                - Business loan types and eligibility criteria
+                - Working capital management and cash flow planning
+                - Business registration, compliance, and tax planning
+                - Partnership vs. proprietorship vs. company structures
+                - Business insurance and risk management
+                - Equipment financing and asset acquisition strategies
+                - Export-import financing and trade finance
+                - Business expansion funding and scaling strategies
+                - Exit planning and business valuation methods
+                """;
+                
+            case "LIFE_EVENTS" -> """
+                LIFE EVENT FINANCIAL PLANNING:
+                - Marriage and wedding expense planning
+                - Joint financial planning for couples
+                - Family protection through insurance and investments
+                - Maternity and childcare financial preparation
+                - Elder care and parents' financial support
+                - Divorce financial planning and asset division
+                - Emergency planning for health and job loss
+                - Relocation and job change financial management
+                - Festival and celebration budgeting
+                - Legacy planning and wealth transfer strategies
+                """;
+                
+            case "TRAVEL_PLANNING" -> """
+                TRAVEL & LIFESTYLE FINANCING:
+                - Travel savings and vacation fund planning
+                - Travel insurance and international coverage
+                - Forex planning and currency exchange strategies
+                - Travel loans and credit card benefits
+                - International investment and NRI planning
+                - Travel budgeting and expense management
+                - Frequent traveler financial optimization
+                - Business travel expense management
+                - Adventure and luxury travel financing
+                - Travel emergency fund and contingency planning
+                """;
+                
+            case "INVESTMENT" -> """
+                INVESTMENT & WEALTH BUILDING EXPERTISE:
+                - Comprehensive portfolio construction and optimization
+                - Tax-efficient investment strategies and planning
+                - Risk assessment and diversification techniques
+                - Market timing and systematic investment approaches
+                - Alternative investments (REITs, gold, commodities)
+                - International diversification and global exposure
+                - Retirement planning and pension optimization
+                - Estate planning and wealth transfer strategies
+                - Performance monitoring and rebalancing techniques
+                - Behavioral finance and investment psychology
+                """;
+                
+            default -> """
+                COMPREHENSIVE FINANCIAL PLANNING:
+                - Holistic financial health assessment and improvement
+                - Goal-based financial planning and prioritization
+                - Cash flow management and budgeting techniques
+                - Risk management through insurance and diversification
+                - Tax planning and optimization strategies
+                - Investment planning across asset classes
+                - Retirement and post-retirement financial security
+                - Estate planning and wealth preservation
+                - Financial discipline and behavioral coaching
+                - Regular review and adjustment strategies
+                """;
+        };
+    }
+
+    private String enhanceFinancialResponse(String llmResponse, ChatRequest request) {
+        StringBuilder enhancedResponse = new StringBuilder();
+        
+        // Add personalized greeting if profile is available
+        if (request.getFinancialProfile() != null && request.getFinancialProfile().getAge() != null) {
+            enhancedResponse.append("🎯 **Personalized Financial Advice for You**\n\n");
+        }
+        
+        // Add the LLM response
+        enhancedResponse.append(llmResponse);
+        
+        // Add relevant quick actions or follow-up suggestions
+        enhancedResponse.append("\n\n");
+        enhancedResponse.append(generateQuickActions(request));
+        
+        // Add standard disclaimer
+        enhancedResponse.append("\n\n⚠️ **Important Disclaimer**: This advice is for educational purposes only. ");
+        enhancedResponse.append("Please consult with a qualified financial advisor for decisions specific to your situation. ");
+        enhancedResponse.append("All investments are subject to market risks.");
+        
+        return enhancedResponse.toString();
+    }
+
+    private String generateQuickActions(ChatRequest request) {
+        String questionType = detectQuestionType(request.getMessage());
+        
+        return switch (questionType) {
+            case "REAL_ESTATE" -> """
+                🏠 **Next Steps for Property Planning:**
+                • Use our comprehensive-guidance API for complete investment planning
+                • Calculate your home loan eligibility and EMI
+                • Research property locations and market trends
+                • Plan your down payment and additional costs
+                • Consider property insurance and legal verification
+                """;
+                
+            case "VEHICLE_FINANCE" -> """
+                🚗 **Next Steps for Vehicle Planning:**
+                • Compare auto loan offers from different banks
+                • Calculate total cost of ownership including insurance
+                • Consider new vs. used vehicle options
+                • Plan for vehicle maintenance and depreciation
+                • Explore electric vehicle incentives if applicable
+                """;
+                
+            case "EDUCATION_PLANNING" -> """
+                🎓 **Next Steps for Education Planning:**
+                • Research education loan options and eligibility
+                • Start a dedicated education savings plan
+                • Explore scholarship and grant opportunities
+                • Consider international study financing if applicable
+                • Plan for education inflation over time
+                """;
+                
+            case "BUSINESS_FINANCE" -> """
+                💼 **Next Steps for Business Planning:**
+                • Prepare a detailed business plan and financial projections
+                • Research funding options suitable for your business stage
+                • Consider business registration and compliance requirements
+                • Plan for working capital and cash flow management
+                • Explore business insurance and risk management
+                """;
+                
+            default -> """
+                💡 **Recommended Next Steps:**
+                • Use our comprehensive-guidance API for complete financial planning
+                • Consider creating a detailed financial profile for personalized advice
+                • Start with small, consistent steps toward your financial goals
+                • Review and adjust your plan regularly
+                • Seek professional advice for complex decisions
+                """;
+        };
     }
 }

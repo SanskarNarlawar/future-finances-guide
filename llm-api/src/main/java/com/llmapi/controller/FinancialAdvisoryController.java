@@ -360,6 +360,84 @@ public class FinancialAdvisoryController {
                         """
                     ),
                     @ExampleObject(
+                        name = "🏠 Home Buying Planning",
+                        summary = "Detailed home purchase financial planning",
+                        value = """
+                        {
+                          "message": "I want to buy a 3BHK flat in Bangalore worth ₹80 lakhs. I earn ₹12 LPA and have ₹15 lakhs saved. What's the best financing strategy? Should I take the maximum loan or pay more down payment?",
+                          "session_id": "home-buyer-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 32,
+                            "income_range": "RANGE_100K_150K",
+                            "financial_goals": ["HOME_PURCHASE"],
+                            "current_savings": 1500000,
+                            "monthly_expenses": 60000,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "MARRIED"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🚗 Car Purchase Decision",
+                        summary = "Vehicle financing and purchase advice",
+                        value = """
+                        {
+                          "message": "I'm planning to buy my first car worth ₹8 lakhs. Should I take an auto loan or use my savings? I also want to know about insurance, maintenance costs, and whether to buy new or used.",
+                          "session_id": "car-buyer-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 26,
+                            "income_range": "RANGE_50K_75K",
+                            "current_savings": 400000,
+                            "monthly_expenses": 35000,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "SINGLE"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "🎓 Education Loan Planning",
+                        summary = "Education financing for higher studies",
+                        value = """
+                        {
+                          "message": "My child is 15 years old and I want to send them abroad for engineering studies. The estimated cost is ₹50 lakhs. How should I plan and save for this? Should I consider education loans?",
+                          "session_id": "education-planning-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 42,
+                            "income_range": "RANGE_100K_150K",
+                            "financial_goals": ["CHILD_EDUCATION"],
+                            "current_savings": 800000,
+                            "number_of_dependents": 2,
+                            "employment_status": "EMPLOYED_FULL_TIME",
+                            "marital_status": "MARRIED"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "💼 Business Startup Funding",
+                        summary = "Startup and business financing advice",
+                        value = """
+                        {
+                          "message": "I want to start a tech startup and need ₹25 lakhs initial funding. I have ₹8 lakhs saved. What are my options - personal loan, business loan, or should I look for investors? What about business registration and compliance costs?",
+                          "session_id": "startup-funding-session",
+                          "advisory_mode": "GENERAL",
+                          "financial_profile": {
+                            "age": 29,
+                            "income_range": "RANGE_75K_100K",
+                            "interests": ["technology", "entrepreneurship"],
+                            "financial_goals": ["BUSINESS_INVESTMENT"],
+                            "current_savings": 800000,
+                            "employment_status": "EMPLOYED_FULL_TIME"
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
                         name = "🏠 Home Buying Query",
                         summary = "Questions about home purchase planning",
                         value = """
@@ -415,20 +493,38 @@ public class FinancialAdvisoryController {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = ChatResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "id": "financial-advice-123",
-                      "session_id": "tech-professional-session",
-                      "message": "Great question! At 28 with your tech background and ₹50,000 to start, here's my personalized advice:\\n\\n**For beginners like you, I recommend starting with mutual funds:**\\n\\n🎯 **Why Mutual Funds First:**\\n- Professional management\\n- Instant diversification\\n- Lower risk than individual stocks\\n- Perfect for ₹50,000 starting amount\\n\\n📈 **Recommended Allocation:**\\n- Large Cap SIP: ₹20,000 (SBI Bluechip Fund)\\n- Flexi Cap SIP: ₹15,000 (HDFC Flexi Cap)\\n- Tech Sector Fund: ₹10,000 (aligns with your interests)\\n- Emergency Fund: ₹5,000\\n\\n💡 **Next Steps:**\\n1. Start SIPs immediately\\n2. Increase by 10% annually\\n3. After 2-3 years, consider direct stocks\\n\\n⚠️ **Important**: This advice is based on your profile. Consult a financial advisor for personalized guidance.",
-                      "model_name": "gpt-3.5-turbo",
-                      "created_at": "2024-01-15T10:30:00",
-                      "token_count": 180,
-                      "advisory_mode": "INVESTMENT_FOCUSED",
-                      "profile_based": true
-                    }
-                    """
-                )
+                examples = {
+                    @ExampleObject(
+                        name = "Investment Advice Response",
+                        value = """
+                        {
+                          "id": "financial-advice-123",
+                          "session_id": "tech-professional-session",
+                          "message": "🎯 **Personalized Financial Advice for You**\\n\\nGreat question! At 28 with your tech background and ₹50,000 to start, here's my personalized advice:\\n\\n**For beginners like you, I recommend starting with mutual funds:**\\n\\n🎯 **Why Mutual Funds First:**\\n- Professional management\\n- Instant diversification\\n- Lower risk than individual stocks\\n- Perfect for ₹50,000 starting amount\\n\\n📈 **Recommended Allocation:**\\n- Large Cap SIP: ₹20,000 (SBI Bluechip Fund)\\n- Flexi Cap SIP: ₹15,000 (HDFC Flexi Cap)\\n- Tech Sector Fund: ₹10,000 (aligns with your interests)\\n- Emergency Fund: ₹5,000\\n\\n💡 **Next Steps:**\\n1. Start SIPs immediately\\n2. Increase by 10% annually\\n3. After 2-3 years, consider direct stocks\\n\\n💡 **Recommended Next Steps:**\\n• Use our comprehensive-guidance API for complete financial planning\\n• Consider creating a detailed financial profile for personalized advice\\n• Start with small, consistent steps toward your financial goals\\n\\n⚠️ **Important Disclaimer**: This advice is for educational purposes only. Please consult with a qualified financial advisor for decisions specific to your situation. All investments are subject to market risks.",
+                          "model_name": "gpt-3.5-turbo",
+                          "created_at": "2024-01-15T10:30:00",
+                          "token_count": 280,
+                          "advisory_mode": "INVESTMENT_FOCUSED",
+                          "profile_based": true
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "Home Buying Advice Response",
+                        value = """
+                        {
+                          "id": "home-advice-456",
+                          "session_id": "home-buyer-session",
+                          "message": "🎯 **Personalized Financial Advice for You**\\n\\n🏠 **Home Purchase Strategy Analysis:**\\n\\nFor your ₹80 lakh flat purchase with ₹15 lakh savings and ₹12 LPA income:\\n\\n💰 **Loan Eligibility Analysis:**\\n- Maximum loan eligibility: ~₹60-65 lakhs (based on 5-6x income)\\n- Recommended EMI: ₹45,000-50,000 (40-45% of income)\\n- Loan tenure: 20-25 years for optimal EMI\\n\\n🎯 **Financing Strategy Options:**\\n\\n**Option 1: Maximum Loan (₹65L)**\\n- Down payment: ₹15 lakhs\\n- EMI: ~₹48,000 for 20 years\\n- Tax benefits: ₹2 lakh under 80C + 24(b)\\n- Liquidity preserved for other investments\\n\\n**Option 2: Higher Down Payment (₹25L)**\\n- Loan amount: ₹55 lakhs\\n- EMI: ~₹41,000 for 20 years\\n- Lower interest burden\\n- Need additional ₹10 lakhs\\n\\n📊 **Recommendation: Go with Option 1**\\n- Better liquidity management\\n- Tax benefits optimization\\n- Invest remaining corpus in equity for higher returns\\n\\n🏠 **Next Steps for Property Planning:**\\n• Calculate your home loan eligibility and EMI\\n• Research property locations and market trends\\n• Plan your down payment and additional costs\\n• Consider property insurance and legal verification\\n\\n⚠️ **Important Disclaimer**: This advice is for educational purposes only. Please consult with a qualified financial advisor for decisions specific to your situation.",
+                          "model_name": "gpt-3.5-turbo",
+                          "created_at": "2024-01-15T10:30:00",
+                          "token_count": 420,
+                          "advisory_mode": "GENERAL",
+                          "profile_based": true
+                        }
+                        """
+                    )
+                }
             )
         )
     })
