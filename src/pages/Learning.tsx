@@ -8,6 +8,7 @@ import { BlogCard, BlogPost } from "@/components/BlogCard";
 import { BookCard, Book } from "@/components/BookCard";
 import { VideoCard, Video as VideoType } from "@/components/VideoCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserMenu } from "@/components/UserMenu";
 import { useTranslations } from "@/hooks/useTranslations";
 import { useToast } from "@/hooks/use-toast";
 
@@ -484,6 +485,7 @@ const Learning = () => {
                 Back
               </Button>
             </Link>
+            <UserMenu />
           </div>
         </div>
       </nav>

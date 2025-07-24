@@ -8,6 +8,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { TrendingUp, TrendingDown, DollarSign, Coins, Building, PiggyBank, Plus, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserMenu } from "@/components/UserMenu";
 import { useTranslations } from "@/hooks/useTranslations";
 
 interface Asset {
@@ -118,6 +119,7 @@ const Dashboard = () => {
                 AI Advisor
               </Button>
             </Link>
+            <UserMenu />
           </div>
         </div>
       </nav>

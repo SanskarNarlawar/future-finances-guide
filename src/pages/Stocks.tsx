@@ -9,6 +9,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, DollarSign, Search, Calendar, ExternalLink, MessageSquare, BookOpen, Bell, Star, Settings, AlertCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserMenu } from "@/components/UserMenu";
 import { useTranslations } from "@/hooks/useTranslations";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -443,6 +444,7 @@ const Stocks = () => {
             >
               <Settings className="h-4 w-4" />
             </Button>
+            <UserMenu />
           </div>
         </div>
       </nav>
