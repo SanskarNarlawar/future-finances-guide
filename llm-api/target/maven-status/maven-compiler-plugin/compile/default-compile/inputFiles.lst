@@ -6,6 +6,7 @@
 /workspace/llm-api/src/main/java/com/llmapi/service/FinancialAdvisoryService.java
 /workspace/llm-api/src/main/java/com/llmapi/model/ChatMessage.java
 /workspace/llm-api/src/main/java/com/llmapi/config/SecurityConfig.java
+/workspace/llm-api/src/main/java/com/llmapi/controller/WebController.java
 /workspace/llm-api/src/main/java/com/llmapi/service/impl/LlmServiceImpl.java
 /workspace/llm-api/src/main/java/com/llmapi/service/LlmService.java
 /workspace/llm-api/src/main/java/com/llmapi/dto/ChatResponse.java

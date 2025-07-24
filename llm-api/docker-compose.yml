@@ -1,56 +1,95 @@
 version: '3.8'
 
 services:
-  llm-api:
-    build: .
+  financial-advisor-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: financial-advisor-api
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
-    depends_on:
-      - postgres
-    networks:
-      - llm-network
-    restart: unless-stopped
+      # Application Configuration
+      SPRING_PROFILES_ACTIVE: deploy
+      
+      # Database Configuration (using H2 for simplicity, can be changed to PostgreSQL/MySQL)
+      DATABASE_URL: jdbc:h2:mem:financialdb
+      DATABASE_DRIVER: org.h2.Driver
+      DATABASE_USERNAME: sa
+      DATABASE_PASSWORD: password
+      DATABASE_DIALECT: org.hibernate.dialect.H2Dialect
+      DDL_AUTO: create-drop
+      
+      # H2 Console (set to false for production)
+      H2_CONSOLE_ENABLED: false
+      
+      # LLM Configuration (set your OpenAI API key here)
+      # OPENAI_API_KEY: your-openai-api-key-here
+      OPENAI_BASE_URL: https://api.openai.com/v1
+      
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: "*"
+      
+      # JVM Configuration
+      JAVA_OPTS: "-Xmx1g -Xms512m -XX:+UseG1GC"
+      
+    volumes:
+      # Optional: Mount logs directory
+      - ./logs:/app/logs
+      
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/llm/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=llmdb
-      - POSTGRES_USER=llmuser
-      - POSTGRES_PASSWORD=llmpass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - llm-network
+      start_period: 60s
+      
     restart: unless-stopped
+    
+    # Optional: Add resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
-  # Optional: pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@llmapi.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - llm-network
-    restart: unless-stopped
+  # Optional: Add PostgreSQL database for production
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: financial-advisor-db
+  #   environment:
+  #     POSTGRES_DB: financialdb
+  #     POSTGRES_USER: financial_user
+  #     POSTGRES_PASSWORD: financial_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U financial_user -d financialdb"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
+  # Optional: Add Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: financial-advisor-cache
+  #   ports:
+  #     - "6379:6379"
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
+
+# Optional: Define volumes for data persistence
+# volumes:
+#   postgres_data:
+#   redis_data:
+
+# Optional: Define custom network
 networks:
-  llm-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
+  default:
+    name: financial-advisor-network

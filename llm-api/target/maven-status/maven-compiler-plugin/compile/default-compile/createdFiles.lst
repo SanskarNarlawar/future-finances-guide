@@ -9,6 +9,7 @@ com/llmapi/dto/InvestmentGuidance$InvestmentBreakdown$InvestmentBreakdownBuilder
 com/llmapi/model/ChatMessage$Role.class
 com/llmapi/dto/FinancialProfile$InvestmentExperience.class
 com/llmapi/dto/InvestmentGuidance$AssetAllocation$AssetAllocationBuilder.class
+com/llmapi/controller/WebController.class
 com/llmapi/service/LlmService.class
 com/llmapi/dto/InvestmentGuidance$SIPRecommendation$SIPRecommendationBuilder.class
 com/llmapi/dto/InvestmentGuidance$BondRecommendation.class

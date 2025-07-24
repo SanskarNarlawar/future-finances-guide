@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 AI Financial Advisor - Smart Money Guidance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>AI Financial Advisor</h1>
+                </div>
+                <div class="header-subtitle">
+                    Smart Money Guidance Powered by AI
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Mode Selector -->
+        <div class="mode-selector">
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="simple">
+                    <i class="fas fa-comments"></i>
+                    Quick Ask
+                </button>
+                <button class="mode-tab" data-mode="detailed">
+                    <i class="fas fa-user-cog"></i>
+                    Detailed Advice
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Simple Chat Mode -->
+            <div id="simple-mode" class="chat-mode active">
+                <div class="chat-header">
+                    <h2><i class="fas fa-rocket"></i> Quick Financial Questions</h2>
+                    <p>Just ask any financial question - no setup required!</p>
+                </div>
+
+                <div class="quick-suggestions">
+                    <h3>Popular Questions:</h3>
+                    <div class="suggestion-grid">
+                        <button class="suggestion-btn" data-question="How do I start investing with ₹10,000?">
+                            <i class="fas fa-seedling"></i>
+                            Start Investing
+                        </button>
+                        <button class="suggestion-btn" data-question="What documents do I need for a home loan?">
+                            <i class="fas fa-home"></i>
+                            Home Loan
+                        </button>
+                        <button class="suggestion-btn" data-question="Which is the best savings account in India?">
+                            <i class="fas fa-piggy-bank"></i>
+                            Savings Account
+                        </button>
+                        <button class="suggestion-btn" data-question="How much should I save for retirement?">
+                            <i class="fas fa-umbrella"></i>
+                            Retirement
+                        </button>
+                        <button class="suggestion-btn" data-question="Should I invest in mutual funds or stocks?">
+                            <i class="fas fa-chart-bar"></i>
+                            Investment Choice
+                        </button>
+                        <button class="suggestion-btn" data-question="What is the best way to pay off debt?">
+                            <i class="fas fa-credit-card"></i>
+                            Debt Management
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="simple-messages"></div>
+                    <div class="chat-input-container">
+                        <div class="input-group">
+                            <input type="text" id="simple-input" placeholder="Ask any financial question..." maxlength="500">
+                            <button id="simple-send" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Chat Mode -->
+            <div id="detailed-mode" class="chat-mode">
+                <div class="chat-header">
+                    <h2><i class="fas fa-user-cog"></i> Personalized Financial Advice</h2>
+                    <p>Get tailored recommendations based on your financial profile</p>
+                </div>
+
+                <!-- Financial Profile Form -->
+                <div class="profile-section">
+                    <div class="profile-toggle">
+                        <button id="profile-toggle-btn" class="toggle-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Add Your Financial Profile (Optional)
+                        </button>
+                    </div>
+
+                    <div id="profile-form" class="profile-form collapsed">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="age">Age</label>
+                                <input type="number" id="age" min="18" max="100" placeholder="e.g., 28">
+                            </div>
+                            <div class="form-group">
+                                <label for="income-range">Income Range</label>
+                                <select id="income-range">
+                                    <option value="">Select Range</option>
+                                    <option value="RANGE_25K_50K">₹25K - ₹50K per month</option>
+                                    <option value="RANGE_50K_75K">₹50K - ₹75K per month</option>
+                                    <option value="RANGE_75K_100K">₹75K - ₹1L per month</option>
+                                    <option value="RANGE_100K_150K">₹1L - ₹1.5L per month</option>
+                                    <option value="RANGE_150K_PLUS">₹1.5L+ per month</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="risk-tolerance">Risk Tolerance</label>
+                                <select id="risk-tolerance">
+                                    <option value="">Select Tolerance</option>
+                                    <option value="CONSERVATIVE">Conservative (Low Risk)</option>
+                                    <option value="MODERATE">Moderate (Medium Risk)</option>
+                                    <option value="AGGRESSIVE">Aggressive (High Risk)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="current-savings">Current Savings (₹)</label>
+                                <input type="number" id="current-savings" min="0" placeholder="e.g., 500000">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthly-expenses">Monthly Expenses (₹)</label>
+                                <input type="number" id="monthly-expenses" min="0" placeholder="e.g., 40000">
+                            </div>
+                            <div class="form-group">
+                                <label for="employment-status">Employment Status</label>
+                                <select id="employment-status">
+                                    <option value="">Select Status</option>
+                                    <option value="EMPLOYED_FULL_TIME">Full-time Employed</option>
+                                    <option value="EMPLOYED_PART_TIME">Part-time Employed</option>
+                                    <option value="SELF_EMPLOYED">Self Employed</option>
+                                    <option value="UNEMPLOYED">Unemployed</option>
+                                    <option value="STUDENT">Student</option>
+                                    <option value="RETIRED">Retired</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="financial-goals">Financial Goals</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="HOME_PURCHASE"> Home Purchase
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="WEALTH_BUILDING"> Wealth Building
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="RETIREMENT_PLANNING"> Retirement Planning
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="CHILD_EDUCATION"> Child Education
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="BUSINESS_INVESTMENT"> Business Investment
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="DEBT_MANAGEMENT"> Debt Management
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interests">Interests/Sectors</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="technology"> Technology
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="healthcare"> Healthcare
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="finance"> Finance
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="real_estate"> Real Estate
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="energy"> Energy
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="consumer_goods"> Consumer Goods
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="detailed-messages"></div>
+                    <div class="chat-input-container">
+                        <div class="input-group">
+                            <input type="text" id="detailed-input" placeholder="Ask for personalized financial advice..." maxlength="500">
+                            <button id="detailed-send" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Getting your financial advice...</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p><i class="fas fa-shield-alt"></i> Your financial data is secure and not stored</p>
+                <p><i class="fas fa-info-circle"></i> This advice is for educational purposes only. Consult a qualified financial advisor for personalized guidance.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

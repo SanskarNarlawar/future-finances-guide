@@ -21,6 +21,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/financial-advisor/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/", "/index.html", "/styles.css", "/script.js").permitAll()
+                .requestMatchers("/chat", "/advisor", "/financial-advisor").permitAll()
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions().disable()); // For H2 console
