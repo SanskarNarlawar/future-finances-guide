@@ -59,7 +59,7 @@ const Stocks = () => {
   const [selectedStock, setSelectedStock] = useState<string>("AAPL");
   const [timeframe, setTimeframe] = useState<string>("1D");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [watchlist, setWatchlist] = useState<string[]>(["AAPL", "GOOGL", "MSFT", "TSLA"]);
+  const [watchlist, setWatchlist] = useState<string[]>(["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA"]);
   const [apiConfig, setApiConfig] = useState<ApiKeyConfig>({ apiKey: "", isConfigured: false });
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [stocksData, setStocksData] = useState<Record<string, StockData>>({});
@@ -69,47 +69,199 @@ const Stocks = () => {
   const [error, setError] = useState<string | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
   const [newsLoading, setNewsLoading] = useState(false);
+  const [useMockData, setUseMockData] = useState(false);
 
   // Load API key from localStorage on component mount
   useEffect(() => {
     const savedApiKey = localStorage.getItem('alphaVantageApiKey');
     if (savedApiKey) {
       setApiConfig({ apiKey: savedApiKey, isConfigured: true });
+      setUseMockData(false);
     } else {
       setShowApiKeyInput(true);
+      setUseMockData(true);
     }
   }, []);
+
+  // Initialize with mock data when using mock mode
+  useEffect(() => {
+    if (useMockData) {
+      setStocksData(mockStocksData);
+      setNewsData(getMockNewsData(selectedStock));
+      generateMockChartData(selectedStock, timeframe, mockStocksData[selectedStock]?.price);
+    }
+  }, [useMockData, selectedStock, timeframe, mockStocksData, getMockNewsData, generateMockChartData]);
 
   const handleApiKeySubmit = useCallback((key: string) => {
     if (key.trim()) {
       localStorage.setItem('alphaVantageApiKey', key.trim());
       setApiConfig({ apiKey: key.trim(), isConfigured: true });
       setShowApiKeyInput(false);
+      setUseMockData(false);
       setError(null);
     }
   }, []);
 
-  // Memoize mock news data generator to prevent recreation
-  const getMockNewsData = useMemo(() => (symbol: string): NewsItem[] => [
-    {
-      id: "1",
-      title: `${symbol} Reports Strong Quarterly Earnings`,
-      summary: `${symbol} reported better-than-expected quarterly results with strong revenue growth.`,
-      source: "Financial News",
-      publishedAt: new Date().toISOString(),
-      url: "#",
-      sentiment: "positive"
+  const handleUseMockData = useCallback(() => {
+    setUseMockData(true);
+    setApiConfig({ apiKey: "", isConfigured: false });
+    setShowApiKeyInput(false);
+    setError(null);
+  }, []);
+
+  // Comprehensive mock data for when API is not available
+  const mockStocksData = useMemo((): Record<string, StockData> => ({
+    AAPL: {
+      symbol: "AAPL",
+      name: "Apple Inc.",
+      price: 193.42,
+      change: 2.34,
+      changePercent: 1.22,
+      volume: 45672300,
+      marketCap: 2987000000000,
+      high52Week: 199.62,
+      low52Week: 164.08,
+      pe: 29.85,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 191.08,
+      open: 191.55,
+      high: 194.12,
+      low: 190.85
     },
-    {
-      id: "2",
-      title: "Market Volatility Affects Tech Stocks",
-      summary: "Recent market movements have impacted technology sector performance.",
-      source: "Market Watch",
-      publishedAt: new Date().toISOString(),
-      url: "#",
-      sentiment: "neutral"
+    GOOGL: {
+      symbol: "GOOGL",
+      name: "Alphabet Inc.",
+      price: 141.85,
+      change: -1.25,
+      changePercent: -0.87,
+      volume: 28456789,
+      marketCap: 1785000000000,
+      high52Week: 193.31,
+      low52Week: 121.46,
+      pe: 24.67,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 143.10,
+      open: 142.90,
+      high: 143.75,
+      low: 140.22
+    },
+    MSFT: {
+      symbol: "MSFT",
+      name: "Microsoft Corporation",
+      price: 417.69,
+      change: 5.12,
+      changePercent: 1.24,
+      volume: 22834567,
+      marketCap: 3107000000000,
+      high52Week: 468.35,
+      low52Week: 362.90,
+      pe: 32.15,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 412.57,
+      open: 413.45,
+      high: 419.33,
+      low: 411.88
+    },
+    TSLA: {
+      symbol: "TSLA",
+      name: "Tesla, Inc.",
+      price: 248.87,
+      change: -3.45,
+      changePercent: -1.37,
+      volume: 67892345,
+      marketCap: 793000000000,
+      high52Week: 299.29,
+      low52Week: 138.80,
+      pe: 65.43,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 252.32,
+      open: 251.75,
+      high: 253.11,
+      low: 247.22
+    },
+    AMZN: {
+      symbol: "AMZN",
+      name: "Amazon.com, Inc.",
+      price: 173.26,
+      change: 1.89,
+      changePercent: 1.10,
+      volume: 34567891,
+      marketCap: 1809000000000,
+      high52Week: 201.20,
+      low52Week: 139.52,
+      pe: 43.21,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 171.37,
+      open: 172.15,
+      high: 174.88,
+      low: 171.55
+    },
+    NVDA: {
+      symbol: "NVDA",
+      name: "NVIDIA Corporation",
+      price: 138.07,
+      change: 4.23,
+      changePercent: 3.16,
+      volume: 89234567,
+      marketCap: 3398000000000,
+      high52Week: 152.89,
+      low52Week: 47.32,
+      pe: 78.92,
+      lastUpdated: new Date().toISOString(),
+      previousClose: 133.84,
+      open: 134.55,
+      high: 139.78,
+      low: 133.22
     }
-  ], []);
+  }), []);
+
+  // Memoize mock news data generator to prevent recreation
+  const getMockNewsData = useMemo(() => (symbol: string): NewsItem[] => {
+    const newsTemplates = [
+      {
+        id: "1",
+        title: `${symbol} Reports Strong Quarterly Earnings`,
+        summary: `${symbol} reported better-than-expected quarterly results with strong revenue growth and improved profit margins.`,
+        source: "Financial News Network",
+        sentiment: "positive" as const
+      },
+      {
+        id: "2",
+        title: "Market Volatility Affects Tech Stocks",
+        summary: "Recent market movements have impacted technology sector performance, with mixed reactions from investors.",
+        source: "Market Watch",
+        sentiment: "neutral" as const
+      },
+      {
+        id: "3",
+        title: `Analysts Upgrade ${symbol} Price Target`,
+        summary: `Several Wall Street analysts have raised their price targets for ${symbol} following strong fundamentals.`,
+        source: "Investment Research",
+        sentiment: "positive" as const
+      },
+      {
+        id: "4",
+        title: "Sector Rotation Impacts Growth Stocks",
+        summary: "Institutional investors are rotating between sectors, affecting growth stock valuations including major tech names.",
+        source: "Bloomberg Finance",
+        sentiment: "neutral" as const
+      },
+      {
+        id: "5",
+        title: `${symbol} Announces Strategic Partnership`,
+        summary: `${symbol} has entered into a strategic partnership that could drive future growth and market expansion.`,
+        source: "Corporate News",
+        sentiment: "positive" as const
+      }
+    ];
+
+    return newsTemplates.map(template => ({
+      ...template,
+      publishedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      url: "#",
+      relevanceScore: 0.7 + Math.random() * 0.3
+    }));
+  }, []);
 
   // Fix generateMockChartData to not depend on stocksData directly
   const generateMockChartData = useCallback((symbol: string, timeframe: string, basePrice?: number) => {
@@ -143,7 +295,7 @@ const Stocks = () => {
 
   // Fetch stock data when API key is configured or selected stock changes
   useEffect(() => {
-    if (!apiConfig.isConfigured || !selectedStock) return;
+    if (useMockData || !apiConfig.isConfigured || !selectedStock) return;
 
     const fetchData = async () => {
       if (!apiConfig.apiKey) return;
@@ -314,7 +466,7 @@ const Stocks = () => {
     };
 
     fetchData();
-  }, [apiConfig.isConfigured, selectedStock, timeframe, apiConfig.apiKey, generateMockChartData, getMockNewsData]);
+  }, [useMockData, apiConfig.isConfigured, selectedStock, timeframe, apiConfig.apiKey, generateMockChartData, getMockNewsData]);
 
   // Removed the duplicate useEffect for chart data since timeframe is already handled above
 
@@ -369,13 +521,23 @@ const Stocks = () => {
                 onKeyPress={(e) => e.key === 'Enter' && handleApiKeySubmit(apiConfig.apiKey)}
               />
             </div>
-            <Button 
-              onClick={() => handleApiKeySubmit(apiConfig.apiKey)} 
-              className="w-full"
-              disabled={!apiConfig.apiKey.trim()}
-            >
-              Configure API Key
-            </Button>
+            <div className="space-y-3">
+              <Button 
+                onClick={() => handleApiKeySubmit(apiConfig.apiKey)} 
+                className="w-full"
+                disabled={!apiConfig.apiKey.trim()}
+              >
+                Configure API Key
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">or</div>
+              <Button 
+                onClick={handleUseMockData}
+                variant="outline"
+                className="w-full"
+              >
+                Continue with Demo Data
+              </Button>
+            </div>
             <div className="text-sm text-muted-foreground space-y-2">
               <p>Don't have an API key? Get one free at:</p>
               <a 
@@ -387,6 +549,9 @@ const Stocks = () => {
                 alphavantage.co/support/#api-key
               </a>
               <p className="text-xs">Free tier: 25 requests per day</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Demo mode uses realistic sample data for testing the interface
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -441,10 +606,38 @@ const Stocks = () => {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Stock Market</h1>
-          <p className="text-muted-foreground text-lg">
-            Live stock data powered by Alpha Vantage
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Stock Market</h1>
+              <p className="text-muted-foreground text-lg">
+                {useMockData ? "Demo mode with sample data" : "Live stock data powered by Alpha Vantage"}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {useMockData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApiKeyInput(true)}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Use Live Data
+                </Button>
+              )}
+              {!useMockData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setUseMockData(true);
+                    setApiConfig({ apiKey: "", isConfigured: false });
+                  }}
+                >
+                  Switch to Demo
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -492,6 +685,11 @@ const Stocks = () => {
             <CardTitle className="flex items-center gap-2">
               <Star className="h-5 w-5" />
               Watchlist
+              {useMockData && (
+                <Badge variant="secondary" className="text-xs">
+                  Demo Data
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
