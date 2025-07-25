@@ -54,11 +54,7 @@ const App = () => (
             />
             <Route 
               path="/stocks" 
-              element={
-                <ProtectedRoute>
-                  <Stocks />
-                </ProtectedRoute>
-              } 
+              element={<Stocks />}
             />
             <Route 
               path="/profile" 

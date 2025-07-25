@@ -62,53 +62,6 @@ const Stocks = () => {
   const [watchlist, setWatchlist] = useState<string[]>(["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA"]);
   const [apiConfig, setApiConfig] = useState<ApiKeyConfig>({ apiKey: "", isConfigured: false });
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [stocksData, setStocksData] = useState<Record<string, StockData>>({});
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [newsData, setNewsData] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [chartLoading, setChartLoading] = useState(false);
-  const [newsLoading, setNewsLoading] = useState(false);
-  const [useMockData, setUseMockData] = useState(false);
-
-  // Load API key from localStorage on component mount
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('alphaVantageApiKey');
-    if (savedApiKey) {
-      setApiConfig({ apiKey: savedApiKey, isConfigured: true });
-      setUseMockData(false);
-    } else {
-      setShowApiKeyInput(true);
-      setUseMockData(true);
-    }
-  }, []);
-
-  // Initialize with mock data when using mock mode
-  useEffect(() => {
-    if (useMockData) {
-      setStocksData(mockStocksData);
-      setNewsData(getMockNewsData(selectedStock));
-      generateMockChartData(selectedStock, timeframe, mockStocksData[selectedStock]?.price);
-    }
-  }, [useMockData, selectedStock, timeframe, mockStocksData, getMockNewsData, generateMockChartData]);
-
-  const handleApiKeySubmit = useCallback((key: string) => {
-    if (key.trim()) {
-      localStorage.setItem('alphaVantageApiKey', key.trim());
-      setApiConfig({ apiKey: key.trim(), isConfigured: true });
-      setShowApiKeyInput(false);
-      setUseMockData(false);
-      setError(null);
-    }
-  }, []);
-
-  const handleUseMockData = useCallback(() => {
-    setUseMockData(true);
-    setApiConfig({ apiKey: "", isConfigured: false });
-    setShowApiKeyInput(false);
-    setError(null);
-  }, []);
-
   // Comprehensive mock data for when API is not available
   const mockStocksData = useMemo((): Record<string, StockData> => ({
     AAPL: {
@@ -215,7 +168,33 @@ const Stocks = () => {
     }
   }), []);
 
-  // Memoize mock news data generator to prevent recreation
+  // Generate initial mock chart data
+  const getInitialChartData = useCallback((symbol: string, timeframe: string): ChartData[] => {
+    const basePrice = mockStocksData[symbol]?.price || 193.42;
+    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
+    
+    const data: ChartData[] = [];
+    for (let i = days; i >= 0; i--) {
+      const date = new Date();
+      if (timeframe === "1D") {
+        date.setMinutes(date.getMinutes() - (i * 5));
+      } else {
+        date.setDate(date.getDate() - i);
+      }
+      
+      const variation = (Math.random() - 0.5) * 5;
+      const price = basePrice + variation - (i * 0.01);
+      
+      data.push({
+        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
+        price: Math.max(price, basePrice * 0.9),
+        volume: Math.floor(Math.random() * 10000000) + 1000000
+      });
+    }
+    return data;
+  }, [mockStocksData]);
+
+  // Memoize mock news data generator
   const getMockNewsData = useMemo(() => (symbol: string): NewsItem[] => {
     const newsTemplates = [
       {
@@ -238,20 +217,6 @@ const Stocks = () => {
         summary: `Several Wall Street analysts have raised their price targets for ${symbol} following strong fundamentals.`,
         source: "Investment Research",
         sentiment: "positive" as const
-      },
-      {
-        id: "4",
-        title: "Sector Rotation Impacts Growth Stocks",
-        summary: "Institutional investors are rotating between sectors, affecting growth stock valuations including major tech names.",
-        source: "Bloomberg Finance",
-        sentiment: "neutral" as const
-      },
-      {
-        id: "5",
-        title: `${symbol} Announces Strategic Partnership`,
-        summary: `${symbol} has entered into a strategic partnership that could drive future growth and market expansion.`,
-        source: "Corporate News",
-        sentiment: "positive" as const
       }
     ];
 
@@ -262,6 +227,60 @@ const Stocks = () => {
       relevanceScore: 0.7 + Math.random() * 0.3
     }));
   }, []);
+
+  // Initialize states with mock data
+  const [stocksData, setStocksData] = useState<Record<string, StockData>>(mockStocksData);
+  const [chartData, setChartData] = useState<ChartData[]>(() => getInitialChartData("AAPL", "1D"));
+  const [newsData, setNewsData] = useState<NewsItem[]>(() => getMockNewsData("AAPL"));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [useMockData, setUseMockData] = useState(true); // Start with mock data by default
+
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('alphaVantageApiKey');
+    if (savedApiKey) {
+      setApiConfig({ apiKey: savedApiKey, isConfigured: true });
+      setUseMockData(false);
+      setShowApiKeyInput(false);
+    } else {
+      // Start with mock data immediately, don't show API input
+      setUseMockData(true);
+      setShowApiKeyInput(false);
+      setApiConfig({ apiKey: "", isConfigured: false });
+    }
+  }, []);
+
+  // Initialize with mock data when using mock mode
+  useEffect(() => {
+    if (useMockData) {
+      setStocksData(mockStocksData);
+      setNewsData(getMockNewsData(selectedStock));
+      const basePrice = mockStocksData[selectedStock]?.price || 150;
+      generateMockChartData(selectedStock, timeframe, basePrice);
+    }
+  }, [useMockData, selectedStock, timeframe, mockStocksData, getMockNewsData, generateMockChartData]);
+
+  const handleApiKeySubmit = useCallback((key: string) => {
+    if (key.trim()) {
+      localStorage.setItem('alphaVantageApiKey', key.trim());
+      setApiConfig({ apiKey: key.trim(), isConfigured: true });
+      setShowApiKeyInput(false);
+      setUseMockData(false);
+      setError(null);
+    }
+  }, []);
+
+  const handleUseMockData = useCallback(() => {
+    setUseMockData(true);
+    setApiConfig({ apiKey: "", isConfigured: false });
+    setShowApiKeyInput(false);
+    setError(null);
+  }, []);
+
+
 
   // Fix generateMockChartData to not depend on stocksData directly
   const generateMockChartData = useCallback((symbol: string, timeframe: string, basePrice?: number) => {
@@ -498,7 +517,7 @@ const Stocks = () => {
   }, [searchQuery, watchlist]);
 
   // API Key Input Component
-  if (showApiKeyInput || !apiConfig.isConfigured) {
+  if (showApiKeyInput && !useMockData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <Card className="w-full max-w-md">
