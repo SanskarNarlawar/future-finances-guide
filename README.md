@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![FinanceAI Logo](public/logo.png)
+**FinanceAI** 💹
 
 **Master your financial future with AI-powered insights, portfolio tracking, and personalized investment advice.**
 

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad1)"/>
+  
+  <!-- Pattern overlay -->
+  <pattern id="pattern" patternUnits="userSpaceOnUse" width="40" height="40">
+    <rect width="40" height="40" fill="none"/>
+    <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#pattern)"/>
+  
+  <!-- Main content container -->
+  <g transform="translate(100, 150)">
+    <!-- FinanceAI Logo -->
+    <rect x="0" y="0" width="80" height="80" rx="12" fill="white"/>
+    <path d="M20 50L35 35L45 45L65 25" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M55 25H65V35" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="60" cy="15" r="4" fill="#fbbf24"/>
+    
+    <!-- Title -->
+    <text x="100" y="35" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">FinanceAI</text>
+    <text x="100" y="70" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.9)">Smart Financial Management</text>
+    
+    <!-- Description -->
+    <text x="0" y="130" font-family="Arial, sans-serif" font-size="28" fill="white">Master your financial future with AI-powered insights</text>
+    <text x="0" y="170" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">Portfolio tracking • AI advisor • Market analysis • Educational resources</text>
+    
+    <!-- Features -->
+    <g transform="translate(0, 220)">
+      <!-- Feature 1 -->
+      <rect x="0" y="0" width="60" height="60" rx="8" fill="rgba(255,255,255,0.15)"/>
+      <path d="M20 35L30 25L40 35" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="80" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Portfolio Tracking</text>
+      <text x="80" y="45" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.8)">Real-time monitoring</text>
+      
+      <!-- Feature 2 -->
+      <rect x="300" y="0" width="60" height="60" rx="8" fill="rgba(255,255,255,0.15)"/>
+      <circle cx="330" cy="30" r="15" stroke="white" stroke-width="2" fill="none"/>
+      <path d="M325 30L330 35L340 25" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="380" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">AI Advisor</text>
+      <text x="380" y="45" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.8)">Personalized insights</text>
+      
+      <!-- Feature 3 -->
+      <rect x="600" y="0" width="60" height="60" rx="8" fill="rgba(255,255,255,0.15)"/>
+      <rect x="615" y="15" width="30" height="30" stroke="white" stroke-width="2" fill="none"/>
+      <path d="M620 35L630 25L640 35" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="680" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Market Analysis</text>
+      <text x="680" y="45" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.8)">Live market data</text>
+    </g>
+  </g>
+</svg>
