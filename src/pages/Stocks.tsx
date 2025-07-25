@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,35 +89,8 @@ const Stocks = () => {
     }
   }, []);
 
-  const generateMockChartData = useCallback((symbol: string, timeframe: string) => {
-    const currentStock = stocksData[symbol];
-    const basePrice = currentStock?.price || 150;
-    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
-    
-    const data: ChartData[] = [];
-    for (let i = days; i >= 0; i--) {
-      const date = new Date();
-      if (timeframe === "1D") {
-        date.setMinutes(date.getMinutes() - (i * 5));
-      } else if (timeframe === "1W") {
-        date.setDate(date.getDate() - i);
-      } else {
-        date.setDate(date.getDate() - i);
-      }
-      
-      const variation = (Math.random() - 0.5) * 5;
-      const price = basePrice + variation - (i * 0.01);
-      
-      data.push({
-        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
-        price: Math.max(price, basePrice * 0.9),
-        volume: Math.floor(Math.random() * 10000000) + 1000000
-      });
-    }
-    setChartData(data);
-  }, [stocksData]);
-
-  const getMockNewsData = useCallback((symbol: string): NewsItem[] => [
+  // Memoize mock news data generator to prevent recreation
+  const getMockNewsData = useMemo(() => (symbol: string): NewsItem[] => [
     {
       id: "1",
       title: `${symbol} Reports Strong Quarterly Earnings`,
@@ -138,196 +111,212 @@ const Stocks = () => {
     }
   ], []);
 
-  const fetchStockData = useCallback(async (symbol: string) => {
-    if (!apiConfig.apiKey) return;
+  // Fix generateMockChartData to not depend on stocksData directly
+  const generateMockChartData = useCallback((symbol: string, timeframe: string, basePrice?: number) => {
+    const currentPrice = basePrice || 150;
+    const days = timeframe === "1D" ? 78 : timeframe === "1W" ? 7 : timeframe === "1M" ? 30 : 52;
     
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Fetch global quote
-      const quoteResponse = await fetch(
-        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiConfig.apiKey}`
-      );
-      const quoteData = await quoteResponse.json();
-
-      // Check for API errors
-      if (quoteData['Error Message']) {
-        throw new Error('Invalid stock symbol or API limit exceeded');
-      }
-      
-      if (quoteData['Note']) {
-        throw new Error('API rate limit exceeded. Please wait a moment and try again.');
-      }
-
-      const quote = quoteData['Global Quote'];
-      if (!quote) {
-        throw new Error('No data available for this symbol');
-      }
-
-      // Fetch company overview for additional data
-      const overviewResponse = await fetch(
-        `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiConfig.apiKey}`
-      );
-      const overviewData = await overviewResponse.json();
-
-      const price = parseFloat(quote['05. price']) || 0;
-      const previousClose = parseFloat(quote['08. previous close']) || 0;
-      const change = parseFloat(quote['09. change']) || 0;
-      const changePercent = parseFloat(quote['10. change percent']?.replace('%', '')) || 0;
-
-      const stockData: StockData = {
-        symbol: quote['01. symbol'] || symbol,
-        name: overviewData['Name'] || symbol,
-        price: price,
-        change: change,
-        changePercent: changePercent,
-        volume: parseInt(quote['06. volume']) || 0,
-        marketCap: overviewData['MarketCapitalization'] ? parseInt(overviewData['MarketCapitalization']) : undefined,
-        high52Week: overviewData['52WeekHigh'] ? parseFloat(overviewData['52WeekHigh']) : undefined,
-        low52Week: overviewData['52WeekLow'] ? parseFloat(overviewData['52WeekLow']) : undefined,
-        pe: overviewData['PERatio'] ? parseFloat(overviewData['PERatio']) : undefined,
-        lastUpdated: quote['07. latest trading day'] || new Date().toISOString(),
-        previousClose: previousClose,
-        open: parseFloat(quote['02. open']) || 0,
-        high: parseFloat(quote['03. high']) || 0,
-        low: parseFloat(quote['04. low']) || 0,
-      };
-
-      setStocksData(prev => ({ ...prev, [symbol]: stockData }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
-    } finally {
-      setLoading(false);
-    }
-  }, [apiConfig.apiKey]);
-
-  const fetchChartData = useCallback(async (symbol: string, timeframe: string) => {
-    if (!apiConfig.apiKey) return;
-    
-    setChartLoading(true);
-    
-    try {
-      let apiFunction = 'TIME_SERIES_DAILY';
-      let outputSize = 'compact'; // Last 100 data points
-      
-      if (timeframe === '1W' || timeframe === '1M') {
-        apiFunction = 'TIME_SERIES_DAILY';
-        outputSize = 'compact';
-      } else if (timeframe === '1Y') {
-        apiFunction = 'TIME_SERIES_WEEKLY';
-        outputSize = 'full';
-      } else if (timeframe === '1D') {
-        apiFunction = 'TIME_SERIES_INTRADAY';
-      }
-
-      let url = '';
-      if (apiFunction === 'TIME_SERIES_INTRADAY') {
-        url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&interval=5min&apikey=${apiConfig.apiKey}`;
+    const data: ChartData[] = [];
+    for (let i = days; i >= 0; i--) {
+      const date = new Date();
+      if (timeframe === "1D") {
+        date.setMinutes(date.getMinutes() - (i * 5));
+      } else if (timeframe === "1W") {
+        date.setDate(date.getDate() - i);
       } else {
-        url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&outputsize=${outputSize}&apikey=${apiConfig.apiKey}`;
+        date.setDate(date.getDate() - i);
       }
-
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data['Error Message'] || data['Note']) {
-        // Fallback to mock data if API limit exceeded
-        generateMockChartData(symbol, timeframe);
-        return;
-      }
-
-      let timeSeries: any = {};
-      if (apiFunction === 'TIME_SERIES_INTRADAY') {
-        timeSeries = data['Time Series (5min)'] || {};
-      } else if (apiFunction === 'TIME_SERIES_DAILY') {
-        timeSeries = data['Time Series (Daily)'] || {};
-      } else if (apiFunction === 'TIME_SERIES_WEEKLY') {
-        timeSeries = data['Weekly Time Series'] || {};
-      }
-
-      const chartPoints: ChartData[] = [];
-      const dates = Object.keys(timeSeries).sort();
       
-      // Filter dates based on timeframe
-      let filteredDates = dates;
-      if (timeframe === '1W') {
-        filteredDates = dates.slice(-7);
-      } else if (timeframe === '1M') {
-        filteredDates = dates.slice(-30);
-      } else if (timeframe === '1D') {
-        filteredDates = dates.slice(-78); // Last 6.5 hours of 5min intervals
-      }
-
-      filteredDates.forEach(date => {
-        const dayData = timeSeries[date];
-        chartPoints.push({
-          date: timeframe === '1D' ? format(new Date(date), 'HH:mm') : format(new Date(date), 'MMM dd'),
-          price: parseFloat(dayData['4. close']),
-          volume: parseInt(dayData['5. volume']) || 0
-        });
+      const variation = (Math.random() - 0.5) * 5;
+      const price = currentPrice + variation - (i * 0.01);
+      
+      data.push({
+        date: timeframe === "1D" ? format(date, 'HH:mm') : format(date, 'MMM dd'),
+        price: Math.max(price, currentPrice * 0.9),
+        volume: Math.floor(Math.random() * 10000000) + 1000000
       });
-
-      setChartData(chartPoints);
-    } catch (err) {
-      // Fallback to mock data on error
-      generateMockChartData(symbol, timeframe);
-    } finally {
-      setChartLoading(false);
     }
-  }, [apiConfig.apiKey, generateMockChartData]);
+    setChartData(data);
+  }, []);
 
-  const fetchNewsData = useCallback(async (symbol: string) => {
-    if (!apiConfig.apiKey) return;
-    
-    setNewsLoading(true);
-    
-    try {
-      const response = await fetch(
-        `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&apikey=${apiConfig.apiKey}`
-      );
-      const data = await response.json();
 
-      if (data['Error Message'] || data['Note']) {
-        // Use mock news data if API limit exceeded
-        setNewsData(getMockNewsData(symbol));
-        return;
-      }
-
-      const newsItems: NewsItem[] = (data.feed || []).slice(0, 5).map((item: any, index: number) => ({
-        id: index.toString(),
-        title: item.title,
-        summary: item.summary,
-        source: item.source,
-        publishedAt: item.time_published,
-        url: item.url,
-        sentiment: item.overall_sentiment_label?.toLowerCase() || 'neutral',
-        relevanceScore: item.relevance_score
-      }));
-
-      setNewsData(newsItems);
-    } catch (err) {
-      setNewsData(getMockNewsData(symbol));
-    } finally {
-      setNewsLoading(false);
-    }
-  }, [apiConfig.apiKey, getMockNewsData]);
 
   // Fetch stock data when API key is configured or selected stock changes
   useEffect(() => {
-    if (apiConfig.isConfigured && selectedStock) {
-      fetchStockData(selectedStock);
-      fetchChartData(selectedStock, timeframe);
-      fetchNewsData(selectedStock);
-    }
-  }, [apiConfig.isConfigured, selectedStock, fetchStockData, fetchChartData, fetchNewsData, timeframe]);
+    if (!apiConfig.isConfigured || !selectedStock) return;
 
-  // Fetch chart data when timeframe changes
-  useEffect(() => {
-    if (apiConfig.isConfigured && selectedStock && timeframe) {
-      fetchChartData(selectedStock, timeframe);
-    }
-  }, [apiConfig.isConfigured, selectedStock, timeframe, fetchChartData]);
+    const fetchData = async () => {
+      if (!apiConfig.apiKey) return;
+      
+      // Fetch stock data
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch global quote
+        const quoteResponse = await fetch(
+          `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${selectedStock}&apikey=${apiConfig.apiKey}`
+        );
+        const quoteData = await quoteResponse.json();
+
+        // Check for API errors
+        if (quoteData['Error Message']) {
+          throw new Error('Invalid stock symbol or API limit exceeded');
+        }
+        
+        if (quoteData['Note']) {
+          throw new Error('API rate limit exceeded. Please wait a moment and try again.');
+        }
+
+        const quote = quoteData['Global Quote'];
+        if (!quote) {
+          throw new Error('No data available for this symbol');
+        }
+
+        // Fetch company overview for additional data
+        const overviewResponse = await fetch(
+          `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${selectedStock}&apikey=${apiConfig.apiKey}`
+        );
+        const overviewData = await overviewResponse.json();
+
+        const price = parseFloat(quote['05. price']) || 0;
+        const previousClose = parseFloat(quote['08. previous close']) || 0;
+        const change = parseFloat(quote['09. change']) || 0;
+        const changePercent = parseFloat(quote['10. change percent']?.replace('%', '')) || 0;
+
+        const stockData: StockData = {
+          symbol: quote['01. symbol'] || selectedStock,
+          name: overviewData['Name'] || selectedStock,
+          price: price,
+          change: change,
+          changePercent: changePercent,
+          volume: parseInt(quote['06. volume']) || 0,
+          marketCap: overviewData['MarketCapitalization'] ? parseInt(overviewData['MarketCapitalization']) : undefined,
+          high52Week: overviewData['52WeekHigh'] ? parseFloat(overviewData['52WeekHigh']) : undefined,
+          low52Week: overviewData['52WeekLow'] ? parseFloat(overviewData['52WeekLow']) : undefined,
+          pe: overviewData['PERatio'] ? parseFloat(overviewData['PERatio']) : undefined,
+          lastUpdated: quote['07. latest trading day'] || new Date().toISOString(),
+          previousClose: previousClose,
+          open: parseFloat(quote['02. open']) || 0,
+          high: parseFloat(quote['03. high']) || 0,
+          low: parseFloat(quote['04. low']) || 0,
+        };
+
+        setStocksData(prev => ({ ...prev, [selectedStock]: stockData }));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch stock data');
+      } finally {
+        setLoading(false);
+      }
+
+      // Fetch chart data
+      setChartLoading(true);
+      
+      try {
+        let apiFunction = 'TIME_SERIES_DAILY';
+        let outputSize = 'compact';
+        
+        if (timeframe === '1W' || timeframe === '1M') {
+          apiFunction = 'TIME_SERIES_DAILY';
+          outputSize = 'compact';
+        } else if (timeframe === '1Y') {
+          apiFunction = 'TIME_SERIES_WEEKLY';
+          outputSize = 'full';
+        } else if (timeframe === '1D') {
+          apiFunction = 'TIME_SERIES_INTRADAY';
+        }
+
+        let url = '';
+        if (apiFunction === 'TIME_SERIES_INTRADAY') {
+          url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${selectedStock}&interval=5min&apikey=${apiConfig.apiKey}`;
+        } else {
+          url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${selectedStock}&outputsize=${outputSize}&apikey=${apiConfig.apiKey}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data['Error Message'] || data['Note']) {
+          generateMockChartData(selectedStock, timeframe, 150);
+          setChartLoading(false);
+          return;
+        }
+
+        let timeSeries: any = {};
+        if (apiFunction === 'TIME_SERIES_INTRADAY') {
+          timeSeries = data['Time Series (5min)'] || {};
+        } else if (apiFunction === 'TIME_SERIES_DAILY') {
+          timeSeries = data['Time Series (Daily)'] || {};
+        } else if (apiFunction === 'TIME_SERIES_WEEKLY') {
+          timeSeries = data['Weekly Time Series'] || {};
+        }
+
+        const chartPoints: ChartData[] = [];
+        const dates = Object.keys(timeSeries).sort();
+        
+        let filteredDates = dates;
+        if (timeframe === '1W') {
+          filteredDates = dates.slice(-7);
+        } else if (timeframe === '1M') {
+          filteredDates = dates.slice(-30);
+        } else if (timeframe === '1D') {
+          filteredDates = dates.slice(-78);
+        }
+
+        filteredDates.forEach(date => {
+          const dayData = timeSeries[date];
+          chartPoints.push({
+            date: timeframe === '1D' ? format(new Date(date), 'HH:mm') : format(new Date(date), 'MMM dd'),
+            price: parseFloat(dayData['4. close']),
+            volume: parseInt(dayData['5. volume']) || 0
+          });
+        });
+
+        setChartData(chartPoints);
+      } catch (err) {
+        generateMockChartData(selectedStock, timeframe, 150);
+      } finally {
+        setChartLoading(false);
+      }
+
+      // Fetch news data
+      setNewsLoading(true);
+      
+      try {
+        const response = await fetch(
+          `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${selectedStock}&apikey=${apiConfig.apiKey}`
+        );
+        const data = await response.json();
+
+        if (data['Error Message'] || data['Note']) {
+          setNewsData(getMockNewsData(selectedStock));
+          setNewsLoading(false);
+          return;
+        }
+
+        const newsItems: NewsItem[] = (data.feed || []).slice(0, 5).map((item: any, index: number) => ({
+          id: index.toString(),
+          title: item.title,
+          summary: item.summary,
+          source: item.source,
+          publishedAt: item.time_published,
+          url: item.url,
+          sentiment: item.overall_sentiment_label?.toLowerCase() || 'neutral',
+          relevanceScore: item.relevance_score
+        }));
+
+        setNewsData(newsItems);
+      } catch (err) {
+        setNewsData(getMockNewsData(selectedStock));
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [apiConfig.isConfigured, selectedStock, timeframe, apiConfig.apiKey, generateMockChartData, getMockNewsData]);
+
+  // Removed the duplicate useEffect for chart data since timeframe is already handled above
 
   const currentStock = stocksData[selectedStock];
   const isPositive = currentStock?.change >= 0;
