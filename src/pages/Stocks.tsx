@@ -228,10 +228,10 @@ const Stocks = () => {
     }));
   }, []);
 
-  // Initialize states with mock data
-  const [stocksData, setStocksData] = useState<Record<string, StockData>>(mockStocksData);
-  const [chartData, setChartData] = useState<ChartData[]>(() => getInitialChartData("AAPL", "1D"));
-  const [newsData, setNewsData] = useState<NewsItem[]>(() => getMockNewsData("AAPL"));
+  // Initialize states with empty data first, then populate via useEffect
+  const [stocksData, setStocksData] = useState<Record<string, StockData>>({});
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
@@ -261,7 +261,7 @@ const Stocks = () => {
       const basePrice = mockStocksData[selectedStock]?.price || 150;
       generateMockChartData(selectedStock, timeframe, basePrice);
     }
-  }, [useMockData, selectedStock, timeframe, mockStocksData, getMockNewsData, generateMockChartData]);
+  }, [useMockData, selectedStock, timeframe]);
 
   const handleApiKeySubmit = useCallback((key: string) => {
     if (key.trim()) {
