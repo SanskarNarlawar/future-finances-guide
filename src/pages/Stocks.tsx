@@ -261,11 +261,21 @@ const Stocks = () => {
 
       filteredDates.forEach(date => {
         const dayData = timeSeries[date];
-        chartPoints.push({
-          date: timeframe === '1D' ? format(new Date(date), 'HH:mm') : format(new Date(date), 'MMM dd'),
-          price: parseFloat(dayData['4. close']),
-          volume: parseInt(dayData['5. volume']) || 0
-        });
+        try {
+          const parsedDate = new Date(date);
+          // Check if date is valid
+          if (isNaN(parsedDate.getTime())) {
+            console.warn('Invalid date in time series:', date);
+            return;
+          }
+          chartPoints.push({
+            date: timeframe === '1D' ? format(parsedDate, 'HH:mm') : format(parsedDate, 'MMM dd'),
+            price: parseFloat(dayData['4. close']),
+            volume: parseInt(dayData['5. volume']) || 0
+          });
+        } catch (error) {
+          console.warn('Error parsing date:', date, error);
+        }
       });
 
       setChartData(chartPoints);
@@ -294,16 +304,38 @@ const Stocks = () => {
         return;
       }
 
-      const newsItems: NewsItem[] = (data.feed || []).slice(0, 5).map((item: any, index: number) => ({
-        id: index.toString(),
-        title: item.title,
-        summary: item.summary,
-        source: item.source,
-        publishedAt: item.time_published,
-        url: item.url,
-        sentiment: item.overall_sentiment_label?.toLowerCase() || 'neutral',
-        relevanceScore: item.relevance_score
-      }));
+      const newsItems: NewsItem[] = (data.feed || []).slice(0, 5).map((item: any, index: number) => {
+        // Parse Alpha Vantage time format (YYYYMMDDTHHMMSS) to ISO string
+        let publishedAt = new Date().toISOString();
+        try {
+          if (item.time_published && typeof item.time_published === 'string') {
+            const timeStr = item.time_published;
+            if (timeStr.length >= 15 && timeStr.includes('T')) {
+              // Format: 20241125T133000 -> 2024-11-25T13:30:00
+              const year = timeStr.substring(0, 4);
+              const month = timeStr.substring(4, 6);
+              const day = timeStr.substring(6, 8);
+              const hour = timeStr.substring(9, 11);
+              const minute = timeStr.substring(11, 13);
+              const second = timeStr.substring(13, 15);
+              publishedAt = `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+            }
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse publishedAt date:', item.time_published, parseError);
+        }
+
+        return {
+          id: index.toString(),
+          title: item.title,
+          summary: item.summary,
+          source: item.source,
+          publishedAt: publishedAt,
+          url: item.url,
+          sentiment: item.overall_sentiment_label?.toLowerCase() || 'neutral',
+          relevanceScore: item.relevance_score
+        };
+      });
 
       setNewsData(newsItems);
     } catch (err) {
@@ -688,7 +720,18 @@ const Stocks = () => {
                 )}
                 <div className="pt-4 border-t">
                   <div className="text-xs text-muted-foreground">
-                    Last updated: {format(new Date(currentStock.lastUpdated), 'MMM dd, yyyy')}
+                    Last updated: {(() => {
+                      try {
+                        const lastUpdatedDate = new Date(currentStock.lastUpdated);
+                        if (isNaN(lastUpdatedDate.getTime())) {
+                          return 'Date unavailable';
+                        }
+                        return format(lastUpdatedDate, 'MMM dd, yyyy');
+                      } catch (error) {
+                        console.warn('Error formatting lastUpdated date:', currentStock.lastUpdated, error);
+                        return 'Date unavailable';
+                      }
+                    })()}
                   </div>
                 </div>
               </CardContent>
@@ -723,7 +766,18 @@ const Stocks = () => {
                     </div>
                     <p className="text-muted-foreground mb-3">{news.summary}</p>
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
-                      <span>{news.source} • {format(new Date(news.publishedAt), 'MMM dd, HH:mm')}</span>
+                      <span>{news.source} • {(() => {
+                        try {
+                          const publishedDate = new Date(news.publishedAt);
+                          if (isNaN(publishedDate.getTime())) {
+                            return 'Date unavailable';
+                          }
+                          return format(publishedDate, 'MMM dd, HH:mm');
+                        } catch (error) {
+                          console.warn('Error formatting news publishedAt date:', news.publishedAt, error);
+                          return 'Date unavailable';
+                        }
+                      })()}</span>
                       <Button variant="ghost" size="sm" asChild>
                         <a href={news.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-4 w-4" />
